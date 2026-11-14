@@ -1,0 +1,20 @@
+# Byte-compiled / Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Render artifacts & heavy media (sync code/scripts/docs, not multi-GB raw frames)
+output/*.mp4
+output/*.mov
+output/*.wav
+output/*.mp3
+output/*.png
+output/frames/
+tmp/
+*.blend1
+
+# Secrets & API keys
+.env
+credentials/
+*.json.secret
