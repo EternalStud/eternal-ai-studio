@@ -24,14 +24,15 @@
    - Compresses/levels voice (`highpass` + `acompressor`), mixes SFX, normalizes to `-14 LUFS`, burns kinetic `.ass` subtitles, and encodes H.264 `+faststart` MP4.
 5. **One-Command Runner:** [`scripts/run_poc1_full.py`](./scripts/run_poc1_full.py)
 
-### Visual QA Performed
-- Rendered 4 hero stills at `540×960` and `1080×1920` (`~3.6–4.7s` total!).
-- Caught & fixed: opaque transmission glass hiding bullion bars, 36mm framing clipping inside 9:16 vertical, `0.8 SEC` vs `NPCI SWITCH` label overlap, and `edge-tts` v7.3 `WordBoundary` flag.
-- Full `1080×1920 @ 24fps` render (`~855` frames, `~0.75s/frame`) + FFmpeg assembly triggered via:
-  ```bash
-  .venv/bin/python3 scripts/run_poc1_full.py --mode anim --res 1080x1920 --fps 24 --samples 12
-  ```
-- Output target: `output/poc1_upi_vs_banks_1080x1920.mp4`
+### Visual QA & POC #1 Render Complete
+- Rendered full **1080×1920 @ 24fps (35.5s, 26 MB)** video with `-14 LUFS` audio + burned kinetic captions in `659.6s` (~11 min) on Apple M2:
+  - Output: `output/poc1_upi_vs_banks_1080x1920.mp4`
+- **Honest Self-Critique (from inspecting final MP4 frames `check_t02.png`, `check_t19.png`, `check_t29.png`):**
+  - *What worked:* Studio obsidian lighting, `AgX` + `Fog Glow` bloom, clear 3D shockwaves synced to node pings, clean cyan word-highlighted kinetic captions, zero cloud cost.
+  - *What to upgrade in V2:*
+    1. Camera whip at Beat 1 (`2.5s`) and Beat 3 (`19.5s`) slightly clips `0.8 SEC` on the edge — keep `CamTarget` centered or pull back 10% during transitions.
+    2. Add **Layer 2 HTML/SVG Transparent HUD Overlay** (hook headline pill + live `0.00s -> 0.80s` stopwatch + `2 DAYS` clock badge) in the upper safe zone so the top 25% isn't empty dark space.
+    3. Test **Voicebox** / **Maono mic** narration vs `edge-tts` so the voice sounds unmistakably human.
 
 ## Next Steps (Pending Human Critique)
 1. Watch `output/poc1_upi_vs_banks_1080x1920.mp4` and evaluate honestly against the 4 gates in [`STRATEGY_AND_MATH.md`](./STRATEGY_AND_MATH.md).
