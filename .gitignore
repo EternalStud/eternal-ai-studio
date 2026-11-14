@@ -12,6 +12,7 @@ output/*.mp3
 output/*.png
 output/frames/
 tmp/
+build/
 *.blend1
 
 # Secrets & API keys

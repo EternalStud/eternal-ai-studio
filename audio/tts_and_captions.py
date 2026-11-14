@@ -166,13 +166,14 @@ async def synthesize_beats(
     all_words: list[WordCue] = []
     cursor_ms = 250  # brief dramatic lead-in
 
-    concat_inputs: list[tuple[Path, int]] = []
+    concat_inputs: list[tuple[Path, int, int]] = []
     for i, beat in enumerate(beats):
         beat_id = beat["id"]
         beat_mp3 = work_dir / f"beat_{i:02d}_{beat_id}.mp3"
         dur_ms, cues = await _synthesize_one(
             beat["narration"], beat_mp3, voice=voice, rate=rate, pitch=pitch
         )
+        effective_dur_ms = min(dur_ms, cues[-1].end_ms + 160) if cues else dur_ms
         shifted_cues = [
             WordCue(
                 text=c.text,
@@ -187,26 +188,32 @@ async def synthesize_beats(
                 beat_id=beat_id,
                 audio_path=str(beat_mp3),
                 start_ms=cursor_ms,
-                end_ms=cursor_ms + dur_ms,
-                duration_ms=dur_ms,
+                end_ms=cursor_ms + effective_dur_ms,
+                duration_ms=effective_dur_ms,
                 words=shifted_cues,
             )
         )
-        concat_inputs.append((beat_mp3, cursor_ms))
-        cursor_ms += dur_ms + gap_ms
+        concat_inputs.append((beat_mp3, cursor_ms, effective_dur_ms))
+        cursor_ms += effective_dur_ms + gap_ms
         await asyncio.sleep(0.15)
 
-    total_ms = cursor_ms + 450
+    total_ms = cursor_ms + 300
     narration_wav = work_dir / "narration_full.wav"
 
     # Mix each beat at its exact millisecond offset so visual & audio stay 100% locked
     cmd = ["ffmpeg", "-y"]
     filter_parts = []
     mix_labels = []
-    for idx, (mp3_path, delay_ms) in enumerate(concat_inputs):
+    for idx, (mp3_path, delay_ms, eff_ms) in enumerate(concat_inputs):
         cmd.extend(["-i", str(mp3_path)])
         lbl = f"a{idx}"
-        filter_parts.append(f"[{idx}:a]adelay={delay_ms}|{delay_ms},aresample=48000[{lbl}]")
+        eff_s = eff_ms / 1000.0
+        fade_st = max(0.0, eff_s - 0.04)
+        filter_parts.append(
+            f"[{idx}:a]atrim=0:{eff_s:.3f},asetpts=PTS-STARTPTS,"
+            f"afade=t=out:st={fade_st:.3f}:d=0.04,"
+            f"adelay={delay_ms}|{delay_ms},aresample=48000[{lbl}]"
+        )
         mix_labels.append(f"[{lbl}]")
 
     filter_parts.append(
@@ -233,6 +240,7 @@ async def synthesize_beats(
         "total_ms": total_ms,
         "narration_wav": str(narration_wav),
         "ass_path": str(ass_path),
+        "words": [asdict(w) for w in all_words],
         "beats": [
             {
                 **{k: v for k, v in asdict(r).items() if k != "words"},

@@ -11,19 +11,22 @@ def assemble_short(
     fps: int,
     narration_wav: Path,
     sfx_wav: Path,
-    ass_path: Path,
+    ass_path: Path | None,
     out_mp4: Path,
 ) -> Path:
     out_mp4.parent.mkdir(parents=True, exist_ok=True)
 
-    # Escape path for ffmpeg ass filter (handles spaces & colons safely)
-    ass_escaped = str(ass_path).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+    if ass_path is not None:
+        ass_escaped = str(ass_path).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+        v_chain = f"[0:v]ass='{ass_escaped}',format=yuv420p[vout];"
+    else:
+        v_chain = "[0:v]format=yuv420p[vout];"
 
     filter_complex = (
-        f"[0:v]ass='{ass_escaped}',format=yuv420p[vout];"
+        f"{v_chain}"
         f"[1:a]aresample=48000,highpass=f=75,acompressor=threshold=-16dB:ratio=3:attack=5:release=60[nar];"
         f"[2:a]aresample=48000[sfx];"
-        f"[nar][sfx]amix=inputs=2:duration=first:dropout_transition=0:weights=1.0 0.85,"
+        f"[nar][sfx]amix=inputs=2:duration=first:dropout_transition=0:weights=1.0 0.90,"
         f"loudnorm=I=-14:TP=-1.5:LRA=9[aout]"
     )
 

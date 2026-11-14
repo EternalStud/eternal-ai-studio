@@ -121,3 +121,100 @@ def generate_sfx_bed(
 
     _write_stereo_wav(out_wav, buf_l, buf_r)
     return out_wav
+
+
+def _add_tick(buf_l: list[float], buf_r: list[float], at_ms: int, pitch: float = 1900.0, gain: float = 0.09) -> None:
+    start = int(at_ms * SAMPLE_RATE / 1000)
+    dur_samples = int(0.035 * SAMPLE_RATE)
+    for i in range(dur_samples):
+        idx = start + i
+        if idx >= len(buf_l):
+            break
+        t = i / SAMPLE_RATE
+        env = math.exp(-t * 140.0)
+        val = math.sin(2.0 * math.pi * pitch * t) * env * gain
+        buf_l[idx] += val
+        buf_r[idx] += val
+
+
+def _add_alarm_pulse(buf_l: list[float], buf_r: list[float], at_ms: int, gain: float = 0.14) -> None:
+    start = int(at_ms * SAMPLE_RATE / 1000)
+    dur_samples = int(0.30 * SAMPLE_RATE)
+    for i in range(dur_samples):
+        idx = start + i
+        if idx >= len(buf_l):
+            break
+        t = i / SAMPLE_RATE
+        env = math.sin(math.pi * (i / dur_samples)) ** 1.2 * math.exp(-t * 4.5)
+        freq = 540.0 if t < 0.14 else 415.0
+        val = (0.75 * math.sin(2.0 * math.pi * freq * t) + 0.25 * math.sin(2.0 * math.pi * freq * 2.0 * t)) * env * gain
+        buf_l[idx] += val * 1.05
+        buf_r[idx] += val * 0.95
+
+
+def _add_riser(buf_l: list[float], buf_r: list[float], start_ms: int, dur_ms: int = 1800, gain: float = 0.12) -> None:
+    start = int(start_ms * SAMPLE_RATE / 1000)
+    dur_samples = int(dur_ms * SAMPLE_RATE / 1000)
+    phase = 0.0
+    for i in range(dur_samples):
+        idx = start + i
+        if idx >= len(buf_l):
+            break
+        norm = i / max(1, dur_samples)
+        freq = 90.0 + 380.0 * (norm ** 2.2)
+        phase += 2.0 * math.pi * freq / SAMPLE_RATE
+        env = (norm ** 1.8) * (1.0 if norm < 0.94 else max(0.0, (1.0 - norm) / 0.06))
+        val = math.sin(phase) * env * gain
+        buf_l[idx] += val
+        buf_r[idx] += val
+
+
+def generate_doc_sfx_bed(
+    total_ms: int,
+    beat_starts_ms: list[int],
+    tick_events_ms: list[tuple[int, float]],
+    alarm_events_ms: list[int],
+    riser_events: list[tuple[int, int]],
+    out_wav: Path,
+) -> Path:
+    """Synthesize dramatic documentary sound bed: dark minor drone, booms, risers, ticks, alarms."""
+    n = int(total_ms * SAMPLE_RATE / 1000) + SAMPLE_RATE
+    buf_l = [0.0] * n
+    buf_r = [0.0] * n
+
+    # Tense minor suspense pulse (D2=73.42, F2=87.31, A2=110.0)
+    fade_in = int(0.5 * SAMPLE_RATE)
+    fade_out = int(0.9 * SAMPLE_RATE)
+    for i in range(n):
+        t = i / SAMPLE_RATE
+        pulse = 0.72 + 0.28 * math.sin(2.0 * math.pi * 1.25 * t)
+        drone = (
+            0.52 * math.sin(2.0 * math.pi * 73.42 * t)
+            + 0.28 * math.sin(2.0 * math.pi * 87.31 * t)
+            + 0.20 * math.sin(2.0 * math.pi * 110.0 * t)
+        )
+        env = 1.0
+        if i < fade_in:
+            env *= i / fade_in
+        if i > n - fade_out:
+            env *= max(0.0, (n - i) / fade_out)
+        val = drone * pulse * env * 0.055
+        buf_l[i] += val
+        buf_r[i] += val
+
+    for idx, b_ms in enumerate(beat_starts_ms):
+        _add_sub_impact(buf_l, buf_r, b_ms, gain=0.34 if idx in (0, 3, 4) else 0.24)
+        if idx > 0:
+            _add_whoosh(buf_l, buf_r, max(0, b_ms - 130), gain=0.14)
+
+    for t_ms, pitch in tick_events_ms:
+        _add_tick(buf_l, buf_r, t_ms, pitch=pitch, gain=0.10)
+
+    for a_ms in alarm_events_ms:
+        _add_alarm_pulse(buf_l, buf_r, a_ms, gain=0.13)
+
+    for r_start, r_dur in riser_events:
+        _add_riser(buf_l, buf_r, r_start, dur_ms=r_dur, gain=0.13)
+
+    _write_stereo_wav(out_wav, buf_l, buf_r)
+    return out_wav

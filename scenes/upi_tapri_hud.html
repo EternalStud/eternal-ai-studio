@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>POC3 Transparent Glass HUD</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: transparent !important;
+    color: #F4F6FA;
+    font-family: "Helvetica Neue", "SF Pro Display", "Menlo", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hud {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    background: transparent;
+  }
+
+  /* Signature persistent top series bar matching @fewshot aesthetic */
+  .series-bar {
+    position: absolute;
+    top: 78px;
+    left: 64px;
+    right: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Menlo", monospace;
+    font-size: 24px;
+    letter-spacing: 3px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+  }
+  .series-title { color: rgba(244, 246, 250, 0.86); }
+  .series-num { color: #FFD23F; font-weight: 800; }
+  .series-handle { color: rgba(244, 246, 250, 0.72); letter-spacing: 1.5px; }
+
+  /* Persistent slow-motion clock pill */
+  .clock-wrap {
+    position: absolute;
+    top: 170px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    opacity: 0;
+  }
+  .clock-pill {
+    padding: 18px 44px;
+    border-radius: 22px;
+    background: rgba(10, 14, 24, 0.76);
+    border: 2px solid rgba(255, 210, 63, 0.45);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+    font-family: "Menlo", monospace;
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .clock-int { color: #FFD23F; }
+  .clock-dec { color: #E2E8F0; font-size: 46px; }
+  .clock-unit { color: #CBD5E1; font-size: 32px; font-weight: 600; }
+  .slow-badge {
+    padding: 7px 24px;
+    border-radius: 999px;
+    background: #FFD23F;
+    color: #0B0E17;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 18px rgba(255, 210, 63, 0.35);
+  }
+
+  /* Glass callout pills floating cleanly inside 3D space */
+  .callout {
+    position: absolute;
+    padding: 18px 28px;
+    border-radius: 16px;
+    background: rgba(11, 16, 28, 0.80);
+    border: 2px solid rgba(255, 210, 63, 0.48);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.58);
+    opacity: 0;
+  }
+  .c-main {
+    font-size: 34px;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.22;
+  }
+  .c-sub {
+    margin-top: 6px;
+    font-family: "Menlo", monospace;
+    font-size: 22px;
+    color: #93C5FD;
+    letter-spacing: 0.5px;
+  }
+  .gold { color: #FFD23F; }
+  .green { color: #34D399; border-color: rgba(52, 211, 153, 0.55); }
+
+  /* Subtle floating hook center pill for beat 0 / beat 5 */
+  .hero-note {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    opacity: 0;
+  }
+  .hero-big {
+    font-size: 56px;
+    font-weight: 900;
+    color: #FFFFFF;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.9);
+  }
+  .hero-small {
+    margin-top: 6px;
+    font-size: 30px;
+    font-weight: 600;
+    color: #93C5FD;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9);
+  }
+
+  /* Finale 5-Layer Vertical Stack */
+  .stack-wrap {
+    position: absolute;
+    top: 390px;
+    left: 110px;
+    right: 110px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    opacity: 0;
+  }
+  .layer-row {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 18px 26px;
+    border-radius: 16px;
+    background: rgba(10, 15, 26, 0.84);
+    border: 1.5px solid rgba(255, 210, 63, 0.45);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  }
+  .layer-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #FFD23F;
+    color: #090C14;
+    font-weight: 900;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .layer-title { font-size: 30px; font-weight: 800; color: #FFFFFF; }
+  .layer-tech { font-family: "Menlo", monospace; font-size: 21px; color: #93C5FD; margin-left: auto; }
+
+  .end-hook {
+    position: absolute;
+    bottom: 290px;
+    left: 80px;
+    right: 80px;
+    padding: 22px 34px;
+    border-radius: 20px;
+    background: rgba(10, 14, 24, 0.86);
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    text-align: center;
+    font-size: 36px;
+    font-weight: 800;
+    color: #FFFFFF;
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="series-bar">
+    <span class="series-title">AISE KAAM KARTA HAI · <span class="series-num">001</span></span>
+    <span class="series-handle">@eternal.ai.studio</span>
+  </div>
+
+  <div class="clock-wrap" id="clockWrap">
+    <div class="clock-pill">
+      <span class="clock-int" id="clkInt">0000</span><span class="clock-dec" id="clkDec">.0</span><span class="clock-unit">ms</span>
+    </div>
+    <div class="slow-badge">100× slow</div>
+  </div>
+
+  <!-- Beat 0: Underground -->
+  <div class="hero-note" id="note_depth" style="top:420px;">
+    <div class="hero-big">~5 ft deep</div>
+    <div class="hero-small">Underground city fiber</div>
+  </div>
+  <div class="callout" id="call_fiber" style="top:640px;left:130px;">
+    <div class="c-main">This light is your <span class="gold">₹20 chai</span> payment</div>
+    <div class="c-sub">2,00,000 km/s · optical beam</div>
+  </div>
+
+  <!-- Beat 1: Tapri -->
+  <div class="callout" id="call_tapri" style="top:1380px;right:76px;">
+    <div class="c-main">Chai Tapri · <span class="gold">₹20.00</span></div>
+    <div class="c-sub">Camera locks UPI QR standee</div>
+  </div>
+
+  <!-- Beat 2: QR Repair -->
+  <div class="callout" id="call_qr1" style="top:390px;left:76px;">
+    <div class="c-main"><span class="gold">3 Finder Eyes</span> lock angle</div>
+    <div class="c-sub">21×21 data blocks</div>
+  </div>
+  <div class="callout" id="call_qr2" style="top:1380px;right:76px;border-color:rgba(52,211,153,0.6);">
+    <div class="c-main"><span class="green">Chai spill?</span> Still scans ✓</div>
+    <div class="c-sub">Reed-Solomon · 30% backup</div>
+  </div>
+
+  <!-- Beat 3: Encrypt & Tower -->
+  <div class="callout" id="call_enc" style="top:1340px;left:72px;">
+    <div class="c-main">Device + <span class="gold">RSA Lock</span></div>
+    <div class="c-sub">Encrypted RF wave to cell tower</div>
+  </div>
+
+  <!-- Beat 4: NPCI Grid -->
+  <div class="callout" id="call_you" style="top:1160px;left:58px;">
+    <div class="c-main" style="font-size:28px;">Your Bank</div>
+    <div class="c-sub">Balance OK ✓</div>
+  </div>
+  <div class="callout" id="call_npci" style="top:460px;left:320px;">
+    <div class="c-main" style="font-size:32px;"><span class="gold">NPCI Switch</span></div>
+    <div class="c-sub">3-Way Ledger Verify</div>
+  </div>
+  <div class="callout" id="call_chai" style="top:1160px;right:58px;border-color:rgba(52,211,153,0.6);">
+    <div class="c-main" style="font-size:28px;">Chaiwala Bank</div>
+    <div class="c-sub" style="color:#6EE7B7;">+₹20 Credited ✓</div>
+  </div>
+
+  <!-- Beat 5: Soundbox -->
+  <div class="callout" id="call_sb" style="top:420px;left:50%;transform:translateX(-50%);border-color:rgba(52,211,153,0.75);text-align:center;">
+    <div class="c-main" style="font-size:44px;"><span class="green">"₹20 prapt hue!"</span></div>
+    <div class="c-sub" style="color:#A7F3D0;">MQTT Push → Soundbox Speaker</div>
+  </div>
+
+  <!-- Beat 6: Finale Stack -->
+  <div class="stack-wrap" id="stackWrap">
+    <div class="layer-row" id="lr_5"><span class="layer-num">5</span><span class="layer-title">Soundbox Audio</span><span class="layer-tech">MQTT push</span></div>
+    <div class="layer-row" id="lr_4"><span class="layer-num">4</span><span class="layer-title">NPCI Switch</span><span class="layer-tech">3-way ledger</span></div>
+    <div class="layer-row" id="lr_3"><span class="layer-num">3</span><span class="layer-title">Hardware Lock</span><span class="layer-tech">RSA / TLS</span></div>
+    <div class="layer-row" id="lr_2"><span class="layer-num">2</span><span class="layer-title">City Fiber</span><span class="layer-tech">2,00,000 km/s</span></div>
+    <div class="layer-row" id="lr_1"><span class="layer-num">1</span><span class="layer-title">QR + Radio</span><span class="layer-tech">Reed-Solomon + RF</span></div>
+  </div>
+  <div class="end-hook" id="endHook">Sab kuch sirf <span class="gold">800 ms</span> mein.</div>
+</div>
+
+<script>
+let MANIFEST = null;
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+window.initDoc = function(m) { MANIFEST = m; };
+
+window.seekToMs = function(tMs) {
+  if (!MANIFEST) return;
+  const beats = MANIFEST.beats;
+  const map = {};
+  for (const b of beats) map[b.beat_id] = b;
+
+  let active = beats[0];
+  for (const b of beats) {
+    if (tMs >= b.start_ms - 40) active = b;
+  }
+  const p = clamp((tMs - active.start_ms) / Math.max(400, active.duration_ms), 0, 1);
+  const fade = p < 0.08 ? p / 0.08 : (p > 0.92 ? (1 - p) / 0.08 : 1);
+
+  // Slow-mo clock runs 0000.0 -> 0800.0 across tapri_intro -> finale_layers
+  const clkStart = map["tapri_intro"].start_ms;
+  const clkEnd = map["finale_layers"].start_ms + 800;
+  const showClk = tMs >= clkStart - 50;
+  const clkWrap = document.getElementById("clockWrap");
+  clkWrap.style.opacity = showClk ? "1" : "0";
+  const msVal = clamp((tMs - clkStart) / Math.max(1, clkEnd - clkStart), 0, 1) * 800.0;
+  const intPart = Math.floor(msVal);
+  const decPart = Math.floor((msVal - intPart) * 10);
+  document.getElementById("clkInt").textContent = String(intPart).padStart(4, "0");
+  document.getElementById("clkDec").textContent = `.${decPart}`;
+
+  // Hide all callouts first
+  const ids = ["note_depth", "call_fiber", "call_tapri", "call_qr1", "call_qr2", "call_enc", "call_you", "call_npci", "call_chai", "call_sb", "stackWrap", "endHook"];
+  for (const id of ids) document.getElementById(id).style.opacity = "0";
+
+  const bid = active.beat_id;
+  if (bid === "underground_hook") {
+    document.getElementById("note_depth").style.opacity = String(fade);
+    document.getElementById("call_fiber").style.opacity = String(p > 0.22 ? fade : 0);
+  } else if (bid === "tapri_intro") {
+    document.getElementById("call_tapri").style.opacity = String(p > 0.22 ? fade : 0);
+  } else if (bid === "qr_repair") {
+    document.getElementById("call_qr1").style.opacity = String(p > 0.10 ? fade : 0);
+    document.getElementById("call_qr2").style.opacity = String(p > 0.45 ? fade : 0);
+  } else if (bid === "encrypt_tower") {
+    document.getElementById("call_enc").style.opacity = String(p > 0.15 ? fade : 0);
+  } else if (bid === "npci_grid") {
+    document.getElementById("call_you").style.opacity = String(p > 0.12 ? fade : 0);
+    document.getElementById("call_npci").style.opacity = String(p > 0.28 ? fade : 0);
+    document.getElementById("call_chai").style.opacity = String(p > 0.52 ? fade : 0);
+  } else if (bid === "soundbox") {
+    document.getElementById("call_sb").style.opacity = String(p > 0.18 ? fade : 0);
+  } else if (bid === "finale_layers") {
+    document.getElementById("stackWrap").style.opacity = "1";
+    for (let k = 1; k <= 5; k++) {
+      const thresh = (5 - k) * 0.12;
+      document.getElementById(`lr_${k}`).style.opacity = p >= thresh ? "1" : "0.18";
+    }
+    document.getElementById("endHook").style.opacity = p > 0.55 ? "1" : "0";
+  }
+};
+</script>
+</body>
+</html>
