@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<title>Eternal AI Studio — Universal Hybrid HUD</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: transparent !important;
+    color: #F4F6FA;
+    font-family: "Helvetica Neue", "SF Pro Display", "Kohinoor Devanagari", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hud-root {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    background: transparent;
+  }
+
+  /* ZONE A: Top Header, Chronometer & Seat State (Y: 0 -> 280px) */
+  .zone-a {
+    position: absolute;
+    top: 56px;
+    left: 60px;
+    right: 60px;
+    height: 215px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .series-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Menlo", monospace;
+    font-size: 21px;
+    letter-spacing: 2.5px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+  }
+  .series-num { color: #FFD447; font-weight: 800; }
+  .handle { color: rgba(244, 246, 250, 0.72); letter-spacing: 1.5px; }
+
+  .chrono-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .chrono-pill {
+    padding: 14px 30px;
+    border-radius: 18px;
+    background: rgba(8, 12, 22, 0.84);
+    border: 2px solid rgba(255, 212, 71, 0.55);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+    font-family: "Menlo", monospace;
+    font-size: 42px;
+    font-weight: 800;
+    color: #FFD447;
+    letter-spacing: 1.5px;
+  }
+  .seat-pill {
+    padding: 14px 24px;
+    border-radius: 18px;
+    background: rgba(8, 12, 22, 0.84);
+    border: 2px solid rgba(52, 211, 153, 0.65);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+    font-family: "Menlo", monospace;
+    font-size: 32px;
+    font-weight: 800;
+    color: #34D399;
+  }
+  .seat-pill.wl {
+    border-color: rgba(251, 113, 133, 0.75);
+    color: #FB7185;
+  }
+  .mode-badge {
+    padding: 6px 22px;
+    border-radius: 999px;
+    background: #FFD447;
+    color: #090C14;
+    font-family: "Menlo", monospace;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+  }
+
+  /* ZONE B: Primary Stick-Figure / CSS3D Stage (Y: 295 -> 1240px, X: 64 -> 930px safe from right UI) */
+  .zone-b {
+    position: absolute;
+    top: 300px;
+    left: 64px;
+    width: 870px;
+    height: 920px;
+    perspective: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  /* Warm editorial stick-figure card (inspired by nilbuild/stick-scene framing) */
+  .stick-card {
+    width: 860px;
+    height: 550px;
+    margin-top: 20px;
+    border-radius: 26px;
+    background-color: #FFFFFF;
+    background-image: radial-gradient(#e2e4ea 1.2px, transparent 1.2px);
+    background-size: 16px 16px;
+    border: 3px solid #1E293B;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+  }
+  .stick-card-head {
+    height: 54px;
+    padding: 0 26px;
+    background: #F8FAFC;
+    border-bottom: 2px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Menlo", monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0F172A;
+  }
+  .stick-stage-wrap {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+  }
+  stick-scene {
+    display: block;
+    width: 820px;
+    height: 470px;
+  }
+
+  /* CSS3D Forensic Dark Cards (floats cleanly over Blender 3D worlds) */
+  .css3d-card {
+    width: 850px;
+    margin-top: 36px;
+    border-radius: 24px;
+    background: rgba(10, 15, 28, 0.86);
+    border: 2px solid rgba(125, 211, 252, 0.42);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    display: none;
+  }
+  .card-head {
+    padding: 16px 26px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "Menlo", monospace;
+    font-size: 21px;
+    color: #93C5FD;
+  }
+  .mac-dot { width: 13px; height: 13px; border-radius: 50%; }
+
+  /* SQL Terminal Card */
+  .sql-body {
+    padding: 26px 28px;
+    font-family: "Menlo", monospace;
+    font-size: 21px;
+    line-height: 1.72;
+  }
+  .sql-line { position: relative; padding: 5px 12px; border-radius: 8px; white-space: pre; }
+  .sql-hl { background: rgba(255, 212, 71, 0.22); border-left: 6px solid #FFD447; }
+  .sql-kw { color: #7AA2F7; font-weight: 700; }
+  .sql-val { color: #34D399; font-weight: 700; }
+  .sql-cm { color: #7C889E; }
+
+  /* Cache vs DB Race Card */
+  .race-grid {
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .race-pane {
+    padding: 20px 22px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+  }
+  .race-lbl { font-family: "Menlo", monospace; font-size: 19px; color: #94A3B8; letter-spacing: 1px; }
+  .race-big { margin-top: 10px; font-family: "Menlo", monospace; font-size: 40px; font-weight: 900; }
+
+  /* Finale Stack Card */
+  .stack-card {
+    width: 850px;
+    margin-top: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stack-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 26px;
+    border-radius: 16px;
+    background: rgba(10, 15, 28, 0.88);
+    border: 1.5px solid rgba(255, 212, 71, 0.45);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  }
+  .stack-idx {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: #FFD447; color: #090C14; font-weight: 900; font-size: 24px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .stack-name { font-size: 28px; font-weight: 800; color: #FFFFFF; }
+  .stack-tech { font-family: "Menlo", monospace; font-size: 20px; color: #93C5FD; margin-left: auto; }
+
+  /* ZONE C: Telemetry Callout Card (Y: 1265 -> 1500px) */
+  .zone-c {
+    position: absolute;
+    top: 1270px;
+    left: 64px;
+    width: 860px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+  }
+  .callout-card {
+    width: 100%;
+    padding: 20px 28px;
+    border-radius: 18px;
+    background: rgba(9, 13, 24, 0.86);
+    border: 2px solid rgba(255, 212, 71, 0.45);
+    border-left: 8px solid #FFD447;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.7);
+  }
+  .callout-title { font-size: 33px; font-weight: 800; color: #FFFFFF; line-height: 1.2; }
+  .callout-sub { margin-top: 6px; font-family: "Menlo", monospace; font-size: 21px; color: #93C5FD; }
+  .callout-src { margin-top: 8px; font-family: "Menlo", monospace; font-size: 17px; color: #94A3B8; letter-spacing: 0.5px; }
+
+  /* ZONE D: Word-Synced Hindi/Hinglish Captions (Y: 1525 -> 1665px) */
+  .zone-d {
+    position: absolute;
+    top: 1525px;
+    left: 64px;
+    width: 860px;
+    height: 135px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .caption-pill {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 28px;
+    border-radius: 18px;
+    background: rgba(6, 9, 16, 0.84);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.72);
+  }
+  .cap-word {
+    font-family: "Kohinoor Devanagari", "Helvetica Neue", sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.22;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .cap-word.active {
+    color: #FFD447;
+    transform: scale(1.08);
+  }
+</style>
+</head>
+<body>
+<div class="hud-root">
+  <!-- ZONE A -->
+  <div class="zone-a" data-hud-zone="A">
+    <div class="series-row">
+      <span>CS EXPLAINED · <span class="series-num">001</span></span>
+      <span class="handle">@eternal.ai.studio</span>
+    </div>
+    <div class="chrono-row">
+      <div class="chrono-pill" id="chronoText">09:59:58.0</div>
+      <div class="seat-pill" id="seatPill">AVL 042</div>
+    </div>
+    <div class="mode-badge" id="modeBadge">TATKAL T-MINUS 2s</div>
+  </div>
+
+  <!-- ZONE B -->
+  <div class="zone-b" data-hud-zone="B">
+    <div class="stick-card" id="stickCard" data-hud-item="stickCard">
+      <div class="stick-card-head">
+        <span id="stickHeadTitle">USER TERMINAL · 09:59:58 AM</span>
+        <span id="stickHeadTag" style="color:#0284C7;">HUMAN ACTION</span>
+      </div>
+      <div class="stick-stage-wrap">
+        <stick-scene id="stickPanic" scene="tatkal_typing_panic" play="idle" zoom="1.55"></stick-scene>
+        <stick-scene id="stickRace" scene="tatkal_mutex_race" play="idle" zoom="1.40" style="display:none;"></stick-scene>
+      </div>
+    </div>
+
+    <div class="css3d-card" id="cardGate" data-hud-item="cardGate">
+      <div class="card-head">
+        <span class="mac-dot" style="background:#FF5F56"></span>
+        <span class="mac-dot" style="background:#FFBD2E"></span>
+        <span class="mac-dot" style="background:#27C93F"></span>
+        <span style="margin-left:8px;">edge_gateway · CRIS NGeT</span>
+      </div>
+      <div class="race-grid">
+        <div class="race-pane" style="border-color:rgba(255,212,71,0.5);">
+          <div class="race-lbl">CONCURRENT SESSIONS</div>
+          <div class="race-big" style="color:#FFD447;">5,00,000+</div>
+        </div>
+        <div class="race-pane" style="border-color:rgba(52,211,153,0.5);">
+          <div class="race-lbl">AUTH + CAPTCHA FILTER</div>
+          <div class="race-big" style="color:#34D399;" id="botDropVal">DROPPING BOTS</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="css3d-card" id="cardCache" data-hud-item="cardCache">
+      <div class="card-head">
+        <span class="mac-dot" style="background:#FF5F56"></span>
+        <span class="mac-dot" style="background:#FFBD2E"></span>
+        <span class="mac-dot" style="background:#27C93F"></span>
+        <span style="margin-left:8px;">READ CACHE vs ACID LEDGER</span>
+      </div>
+      <div class="race-grid">
+        <div class="race-pane" style="border-color:rgba(56,189,248,0.55);">
+          <div class="race-lbl">REDIS READ CACHE (STALE)</div>
+          <div class="race-big" style="color:#38BDF8;">AVL 042</div>
+        </div>
+        <div class="race-pane" style="border-color:rgba(251,113,133,0.65);">
+          <div class="race-lbl">TRUE DB LOCKED ROWS</div>
+          <div class="race-big" style="color:#FB7185;" id="dbActualVal">002 LEFT</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="css3d-card" id="cardSql" data-hud-item="cardSql">
+      <div class="card-head">
+        <span class="mac-dot" style="background:#FF5F56"></span>
+        <span class="mac-dot" style="background:#FFBD2E"></span>
+        <span class="mac-dot" style="background:#27C93F"></span>
+        <span style="margin-left:8px;">prs_booking_tx.sql · MUTEX ROW LOCK</span>
+      </div>
+      <div class="sql-body">
+        <div class="sql-line"><span class="sql-kw">BEGIN TRANSACTION</span> (ISOLATION SERIALIZABLE);</div>
+        <div class="sql-line sql-hl"><span class="sql-kw">SELECT</span> status <span class="sql-kw">FROM</span> berths <span class="sql-kw">WHERE</span> id=<span class="sql-val">'B3-42'</span> <span class="sql-kw">FOR UPDATE</span>;</div>
+        <div class="sql-line sql-cm">-- Thread 1 locks row! 9,999 threads WAIT or fail.</div>
+        <div class="sql-line"><span class="sql-kw">UPDATE</span> berths <span class="sql-kw">SET</span> status=<span class="sql-val">'LOCKED'</span>; <span class="sql-kw">COMMIT</span>;</div>
+      </div>
+    </div>
+
+    <div class="stack-card" id="cardStack" data-hud-item="cardStack">
+      <div class="stack-row"><span class="stack-idx">1</span><span class="stack-name">Edge Auth &amp; CAPTCHA</span><span class="stack-tech">5L+ Session Shield</span></div>
+      <div class="stack-row"><span class="stack-idx">2</span><span class="stack-name">Distributed Read Cache</span><span class="stack-tech">Fast Stale Reads</span></div>
+      <div class="stack-row"><span class="stack-idx">3</span><span class="stack-name">ACID Row Lock (Mutex)</span><span class="stack-tech">SELECT FOR UPDATE</span></div>
+      <div class="stack-row"><span class="stack-idx">4</span><span class="stack-name">Zero Double-Booking</span><span class="stack-tech">1 Seat = 1 Human ✓</span></div>
+    </div>
+  </div>
+
+  <!-- ZONE C -->
+  <div class="zone-c" data-hud-zone="C">
+    <div class="callout-card" id="calloutCard" data-hud-item="calloutCard">
+      <div class="callout-title" id="callTitle">9:59:58 AM — Ready at Keyboard</div>
+      <div class="callout-sub" id="callSub">42 seats appear available across India</div>
+      <div class="callout-src" id="callSrc">Source: CRIS / Indian Railways NGeT Architecture</div>
+    </div>
+  </div>
+
+  <!-- ZONE D -->
+  <div class="zone-d" data-hud-zone="D">
+    <div class="caption-pill" id="captionPill" data-hud-item="captionPill"></div>
+  </div>
+</div>
+
+<script src="./vendor_stick.js"></script>
+<script src="./stick_scenes_tatkal.js"></script>
+<script>
+let MANIFEST = null;
+let CAP_GROUPS = [];
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function groupCaptions(words) {
+  const out = [];
+  let cur = [];
+  for (const w of words) {
+    cur.push(w);
+    const endPunct = /[।?!.,]$/.test(w.text);
+    const charLen = cur.reduce((a, b) => a + b.text.length, 0);
+    if (endPunct || cur.length >= 4 || (cur.length >= 2 && charLen > 18)) {
+      out.push(cur);
+      cur = [];
+    }
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
+window.initDoc = function(m) {
+  MANIFEST = m;
+  CAP_GROUPS = groupCaptions(m.words || []);
+};
+
+window.__qaInspectDom = function() {
+  const boxes = [];
+  for (const el of document.querySelectorAll("[data-hud-item]")) {
+    const st = getComputedStyle(el);
+    if (st.display === "none" || st.opacity === "0") continue;
+    const r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) continue;
+    boxes.push({
+      id: el.getAttribute("data-hud-item"),
+      left: r.left, top: r.top, right: r.right, bottom: r.bottom,
+    });
+  }
+  return boxes;
+};
+
+window.seekToMs = function(tMs) {
+  if (!MANIFEST) return;
+  const beats = MANIFEST.beats;
+  let active = beats[0];
+  for (const b of beats) {
+    if (tMs >= b.start_ms - 40) active = b;
+  }
+  const p = clamp((tMs - active.start_ms) / Math.max(400, active.duration_ms), 0, 1);
+  const bid = active.beat_id;
+
+  // Hide all Zone B visualizers first
+  for (const id of ["stickCard", "cardGate", "cardCache", "cardSql", "cardStack"]) {
+    document.getElementById(id).style.display = "none";
+  }
+
+  const chrono = document.getElementById("chronoText");
+  const seat = document.getElementById("seatPill");
+  const badge = document.getElementById("modeBadge");
+  const cTitle = document.getElementById("callTitle");
+  const cSub = document.getElementById("callSub");
+  const cSrc = document.getElementById("callSrc");
+
+  const stickPanicEl = document.getElementById("stickPanic");
+  const stickRaceEl = document.getElementById("stickRace");
+  stickPanicEl.style.display = "none";
+  stickRaceEl.style.display = "none";
+
+  if (bid === "hook_0959") {
+    const sec = (58.0 + p * 2.0);
+    chrono.textContent = sec < 60 ? `09:59:${sec.toFixed(1).padStart(4, "0")}` : "10:00:00.0";
+    seat.textContent = p > 0.65 ? "WL 180" : "AVL 042";
+    seat.className = p > 0.65 ? "seat-pill wl" : "seat-pill";
+    badge.textContent = p > 0.65 ? "1.2s LATER -> WAITLIST" : "TATKAL WINDOW OPENING";
+    document.getElementById("stickCard").style.display = "flex";
+    document.getElementById("stickHeadTitle").textContent = "USER TERMINAL · 09:59:58 AM";
+    document.getElementById("stickHeadTag").textContent = "HUMAN ACTION";
+    stickPanicEl.style.display = "block";
+    window.STICK.at(stickPanicEl, { u: clamp(p * 0.96, 0, 1), t: tMs / 1000 });
+    cTitle.textContent = "1.2 Seconds: AVL 042 → WL 180";
+    cSub.textContent = "Not a bug. Extreme concurrency collision.";
+    cSrc.textContent = "Source: CRIS / Indian Railways NGeT Architecture";
+  }
+  else if (bid === "scale_illusion") {
+    chrono.textContent = "10:00:00.1";
+    seat.textContent = "AVL 042";
+    seat.className = "seat-pill";
+    badge.textContent = "5 LAKH+ CONCURRENT USERS";
+    cTitle.textContent = "Scale: Millions Hit One Tiny Window";
+    cSub.textContent = "1.5L+ peak tickets/min · 40L+ enquiries/min";
+    cSrc.textContent = "Source: PIB / Ministry of Railways Cloud PRS Release";
+  }
+  else if (bid === "gate1_bot_shield") {
+    chrono.textContent = "10:00:00.2";
+    seat.textContent = "FILTERING";
+    seat.className = "seat-pill";
+    badge.textContent = "GATE 1 · EDGE AUTH SHIELD";
+    const card = document.getElementById("cardGate");
+    card.style.display = "block";
+    card.style.transform = `rotateX(${8 - Math.sin(p * Math.PI) * 3}deg) rotateY(-5deg)`;
+    cTitle.textContent = "Gate 1: Rate Limit + CAPTCHA + Auth";
+    cSub.textContent = "Filters automated scripts before touching DB";
+    cSrc.textContent = "Source: CRIS Security & Microservices Pipeline";
+  }
+  else if (bid === "cache_vs_truth") {
+    chrono.textContent = "10:00:00.4";
+    seat.textContent = "AVL 042*";
+    seat.className = "seat-pill";
+    badge.textContent = "GATE 2 · STALE CACHE ILLUSION";
+    const card = document.getElementById("cardCache");
+    card.style.display = "block";
+    card.style.transform = `rotateX(8deg) rotateY(${4 - Math.sin(p * Math.PI) * 3}deg)`;
+    document.getElementById("dbActualVal").textContent = p > 0.55 ? "000 LEFT" : "002 LEFT";
+    cTitle.textContent = "Read Cache Says AVL 042 (Cached Truth)";
+    cSub.textContent = "Reads use fast cache · Writes require strict DB lock";
+    cSrc.textContent = "Source: Distributed Caching Pattern (Read-Through vs ACID)";
+  }
+  else if (bid === "row_lock_mutex") {
+    chrono.textContent = "10:00:00.6";
+    seat.textContent = "ROW LOCK";
+    seat.className = "seat-pill wl";
+    badge.textContent = "GATE 3 · MUTEX SERIALIZATION";
+    const card = document.getElementById("cardSql");
+    card.style.display = "block";
+    card.style.transform = `rotateX(9deg) rotateY(-5deg)`;
+    cTitle.textContent = "Pessimistic Row Lock (SELECT FOR UPDATE)";
+    cSub.textContent = "Only 1 transaction grabs Berth B3-42 at once";
+    cSrc.textContent = "Source: Relational ACID Isolation Level · Mutex Control";
+  }
+  else if (bid === "why_300ms_kills") {
+    chrono.textContent = `10:00:00.${Math.min(9, 6 + Math.floor(p * 4))}`;
+    seat.textContent = p > 0.5 ? "WL 180" : "LOCK WAIT";
+    seat.className = "seat-pill wl";
+    badge.textContent = "+320 ms LAG = 40 THREADS AHEAD";
+    cTitle.textContent = "Why Your OTP / UPI Lag Loses the Seat";
+    cSub.textContent = "320 ms round-trip allows committed queue threads ahead";
+    cSrc.textContent = "Source: Distributed Locking & Payment Hold Mechanics";
+  }
+  else if (bid === "race_recap") {
+    chrono.textContent = "10:00:01.0";
+    seat.textContent = p > 0.45 ? "WL 180" : "RACING";
+    seat.className = p > 0.45 ? "seat-pill wl" : "seat-pill";
+    badge.textContent = "1 BERTH · ZERO DOUBLE-BOOKING";
+    document.getElementById("stickCard").style.display = "flex";
+    document.getElementById("stickHeadTitle").textContent = "RACE FOR BERTH B3-42";
+    document.getElementById("stickHeadTag").textContent = "MUTEX DEMO";
+    stickRaceEl.style.display = "block";
+    window.STICK.at(stickRaceEl, { u: clamp(p * 0.96, 0, 1), t: tMs / 1000 });
+    cTitle.textContent = "Mutex Prevents 2 Humans on 1 Train Berth";
+    cSub.textContent = "Winner gets 10-min hold · Late request gets WL 180";
+    cSrc.textContent = "Source: Atomic Transaction Guarantee (ACID)";
+  }
+  else if (bid === "cs_law_takeaway") {
+    chrono.textContent = "10:00:01.2";
+    seat.textContent = "LOCKED ✓";
+    seat.className = "seat-pill";
+    badge.textContent = "CONCURRENCY CONTROL MASTERED";
+    const card = document.getElementById("cardStack");
+    card.style.display = "flex";
+    cTitle.textContent = "3 Gates That Save Indian Railways Every Morning";
+    cSub.textContent = "Rate Limit → Read Cache → Pessimistic Row Lock";
+    cSrc.textContent = "CS Explained #001 · Concurrency & ACID Locks";
+  }
+
+  // ZONE D: 4-word synchronized Hindi/Hinglish Captions
+  const pill = document.getElementById("captionPill");
+  let grp = null;
+  for (const g of CAP_GROUPS) {
+    if (tMs >= g[0].start_ms - 80 && tMs <= g[g.length - 1].end_ms + 220) {
+      grp = g;
+      break;
+    }
+  }
+  if (!grp) {
+    pill.style.opacity = "0";
+  } else {
+    pill.style.opacity = "1";
+    pill.innerHTML = grp.map(w => {
+      const act = tMs >= w.start_ms - 30 && tMs <= w.end_ms + 50;
+      return `<span class="cap-word ${act ? "active" : ""}">${w.text}</span>`;
+    }).join("");
+  }
+};
+</script>
+</body>
+</html>

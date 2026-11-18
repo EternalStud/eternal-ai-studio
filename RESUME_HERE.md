@@ -72,11 +72,20 @@
 
 ---
 
-## Next Steps (When User Returns After Watching POC #3)
-1. **User Reviews POC #3** (`output/poc3_chai_tapri_upi_800ms.mp4`) and decides the winning visual format:
-   - Hybrid **Blender 3D + Glass HUD** (POC #3 style),
-   - **HTML5/CSS3D Documentary** (POC #2 style), or
-   - **Combined Best-of-Both** (Blender 3D physical scenes + HTML documentary diagrams/maps/code-cards in one cohesive timeline).
-2. **Scale Flagship Episode #1 to `90s–150s` (`1.5–2.5 min`)**: Expand narrative depth so viewers get complete conceptual clarity (matching [Facebook.mp4](file:///Volumes/Eternal%20T7/PROJECT/eternal-ai-studio/output/Facebook.mp4)'s `154.6s` depth).
-3. **Voice Upgrade Check:** Test human narration via user's **Maono mic** or tuned **Voicebox** Hindi clone vs `hi-IN-MadhurNeural` (`+6%`..`+8%`) before public channel launch.
-4. **Distribution Gate (Still Held Until Quality Approved):** Only connect YouTube / Instagram / Facebook publishing once the flagship `90–150s` episode clears all quality gates.
+---
+
+### Episode 01 — `ep01_tatkal_concurrency` (COMPLETE — Universal 3-Engine CS Flagship)
+- **Topic & Target Audience:** *IRCTC 10:00 AM Tatkal — Million-to-One Concurrency Funnel* (Computer Science, Age 16–36)
+- **Output:** `output/ep01_tatkal_concurrency_1080x1920.mp4` (`40M`, `113.25s` @ `24fps`, `2718 frames`, `2219.1s` / ~37 min total sequential M2 build)
+- **Core Universal Studio Architecture Added (`engine/`, `config/`):**
+  - `engine/blender_studio_kit.py`: Cross-version Blender 4.2/5.3 safe compositor (`Bloom` glare, `ShaderNodeVolumeScatter`), procedural `Noise → Bump` PBR materials, and `animate_shot_clamped()` (`CONSTANT` cuts at `f_next_cut - 1`, zero camera fly-across verified via `cut_test_0429.png` → `cut_test_0430.png`).
+  - `engine/vendor_stick.js` & `engine/stick_scenes_tatkal.js`: MIT-vendored procedural stick-figure rig (`nilbuild/stick-scene`) with deterministic `STICK.at()` seeking for human drama (`tatkal_typing_panic` at `09:59:58` & `tatkal_mutex_race` between `you (320ms)` and `18ms fiber`).
+  - `engine/universal_hud.html`: Strict 5-zone `1080×1920` grid (`Zone A` chronometer + `AVL 042 → WL 180`, `Zone B` stick-card & tilted CSS3D SQL/Cache/Gate cards, `Zone C` telemetry + verified source citation, `Zone D` 4-word gold-highlighted Hinglish captions, `Zone E 1680–1920px` clear).
+  - `config/pronunciation_lexicon.json` + `audio/tts_and_captions.py`: Phonetic Devanagari lexicon mapping (`IRCTC`, `CRIS`, `SQL`, `Mutex`, `Redis`, `OTP`, `CAPTCHA`) while preserving crisp technical spelling in synced captions.
+  - `engine/qa_auditor.py`: Automated `DOM_QA` (`IoU == 0.0`, zero Zone-E leakage), `PIXEL_QA`, and `POST_QA` (`1080×1920`, `duration_s: 113.25`, `lufs: -14.6`, `true_peak_dbfs: -1.3`, `passed: true`).
+- **Verified:** Spot frames (`--spot-only`), cut boundary frames, and final MP4 frames (`v10.png`, `v66.png`, `v96.png`) all visually inspected cleanly.
+
+## Next Steps (When User Returns After Watching Episode 01)
+1. **User Reviews Episode 01** (`output/ep01_tatkal_concurrency_1080x1920.mp4`) and evaluates engagement, pacing (`113s`), stick-figure + 3D + CSS3D blend, and Hindi narration quality.
+2. **If Approved:** Add automated `engine/research_engine.py` + `engine/semantic_director.py` CLI wrappers so passing **any new topic** spawns Episode 02+ cleanly, and evaluate Google Colab GPU bursting (`CMP-001`) + optional human voiceover / Maono mic polish.
+3. **Distribution Gate (Still Held Until Quality Approved):** Only connect YouTube / Instagram / Facebook publishing once you give final green light.

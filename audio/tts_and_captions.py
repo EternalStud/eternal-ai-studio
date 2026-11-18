@@ -4,12 +4,37 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
 
 import edge_tts
+
+LEXICON_PATH = Path(__file__).resolve().parents[1] / "config" / "pronunciation_lexicon.json"
+
+
+def load_pronunciation_lexicon() -> dict[str, str]:
+    if not LEXICON_PATH.exists():
+        return {}
+    data = json.loads(LEXICON_PATH.read_text(encoding="utf-8"))
+    return data.get("replacements", {})
+
+
+def preprocess_tts_text(text: str, lexicon: dict[str, str] | None = None) -> tuple[str, dict[str, str]]:
+    """Replace acronyms/English words with continuous Devanagari phonetics, tracking reverse display map."""
+    lex = lexicon if lexicon is not None else load_pronunciation_lexicon()
+    reverse_map: dict[str, str] = {}
+    out = text
+    # Sort longest keys first so partial substrings never clobber longer tokens
+    for raw_tok in sorted(lex.keys(), key=len, reverse=True):
+        phonetic = lex[raw_tok]
+        pattern = re.compile(rf"\b{re.escape(raw_tok)}\b")
+        if pattern.search(out):
+            out = pattern.sub(phonetic, out)
+            reverse_map[phonetic] = raw_tok
+    return out, reverse_map
 
 
 @dataclass
@@ -166,17 +191,20 @@ async def synthesize_beats(
     all_words: list[WordCue] = []
     cursor_ms = 250  # brief dramatic lead-in
 
+    lexicon = load_pronunciation_lexicon()
     concat_inputs: list[tuple[Path, int, int]] = []
     for i, beat in enumerate(beats):
         beat_id = beat["id"]
         beat_mp3 = work_dir / f"beat_{i:02d}_{beat_id}.mp3"
+        raw_narration = beat.get("tts_narration") or beat["narration"]
+        tts_text, rev_map = preprocess_tts_text(raw_narration, lexicon)
         dur_ms, cues = await _synthesize_one(
-            beat["narration"], beat_mp3, voice=voice, rate=rate, pitch=pitch
+            tts_text, beat_mp3, voice=voice, rate=rate, pitch=pitch
         )
         effective_dur_ms = min(dur_ms, cues[-1].end_ms + 160) if cues else dur_ms
         shifted_cues = [
             WordCue(
-                text=c.text,
+                text=rev_map.get(c.text, c.text),
                 start_ms=c.start_ms + cursor_ms,
                 end_ms=c.end_ms + cursor_ms,
             )
