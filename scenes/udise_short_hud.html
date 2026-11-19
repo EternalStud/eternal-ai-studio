@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<title>UDISE+ Automation YouTube Short HUD</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: transparent !important;
+    color: #F8FAFC;
+    font-family: "Helvetica Neue", "SF Pro Display", "Kohinoor Devanagari", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .hud {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    background: transparent;
+  }
+
+  /* Top Header & Hook Zone (Y: 85 -> 450px) */
+  .top-zone {
+    position: absolute;
+    top: 88px;
+    left: 54px;
+    right: 54px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  .brand-pill {
+    padding: 9px 26px;
+    border-radius: 999px;
+    background: rgba(10, 14, 26, 0.85);
+    border: 1.5px solid rgba(255, 212, 71, 0.55);
+    font-family: "Menlo", monospace;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    color: #FFD447;
+  }
+  .headline {
+    text-align: center;
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: #FFFFFF;
+    text-shadow: 0 6px 24px rgba(0, 0, 0, 0.9);
+  }
+  .headline .gold { color: #FFD447; }
+  .step-badge {
+    padding: 12px 30px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #FFD447, #F59E0B);
+    color: #090D18;
+    font-family: "Menlo", monospace;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow: 0 12px 28px rgba(245, 158, 11, 0.4);
+  }
+
+  /* Crisp Frame Border around the Real Zoomed Screen Clip (x:30, y:536, w:1020, h:608) */
+  .video-frame {
+    position: absolute;
+    left: 26px;
+    top: 532px;
+    width: 1028px;
+    height: 616px;
+    border-radius: 22px;
+    border: 4px solid rgba(255, 212, 71, 0.72);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75);
+    pointer-events: none;
+  }
+  .live-chip {
+    position: absolute;
+    top: 508px;
+    left: 56px;
+    padding: 7px 18px;
+    border-radius: 8px;
+    background: #10B981;
+    color: #041B11;
+    font-family: "Menlo", monospace;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+  }
+
+  /* Feature Info Card below video (Y: 1190 -> 1330px) */
+  .info-card {
+    position: absolute;
+    top: 1188px;
+    left: 54px;
+    right: 54px;
+    padding: 20px 28px;
+    border-radius: 18px;
+    background: rgba(9, 13, 24, 0.88);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    border-left: 7px solid #10B981;
+    text-align: center;
+  }
+  .info-main { font-size: 32px; font-weight: 800; color: #FFFFFF; }
+  .info-sub { margin-top: 6px; font-family: "Menlo", monospace; font-size: 21px; color: #93C5FD; }
+
+  /* Word-Synced Hindi Captions (Y: 1380 -> 1545px, strictly above Shorts bottom UI) */
+  .cap-zone {
+    position: absolute;
+    top: 1375px;
+    left: 54px;
+    right: 54px;
+    height: 155px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cap-pill {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 30px;
+    border-radius: 20px;
+    background: rgba(6, 9, 16, 0.88);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75);
+  }
+  .cap-word {
+    font-family: "Kohinoor Devanagari", "Helvetica Neue", sans-serif;
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.22;
+    color: rgba(255, 255, 255, 0.90);
+  }
+  .cap-word.active {
+    color: #FFD447;
+    transform: scale(1.08);
+  }
+
+  /* Slim Top Progress Bar */
+  .prog-track {
+    position: absolute;
+    top: 38px;
+    left: 54px;
+    right: 54px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #FFD447, #10B981);
+  }
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+
+  <div class="top-zone">
+    <div class="brand-pill">ETERNAL STUDENT · UDISE+ SUITE</div>
+    <div class="headline" id="headline">724 Students Updated in <span class="gold">30 Mins!</span></div>
+    <div class="step-badge" id="stepBadge">FREE GOOGLE COLAB AUTOMATION</div>
+  </div>
+
+  <div class="video-frame"></div>
+  <div class="live-chip" id="liveChip">● LIVE DEMO</div>
+
+  <div class="info-card">
+    <div class="info-main" id="infoMain">Bulk GP Update · PEN Search · Student Import</div>
+    <div class="info-sub" id="infoSub">Zero Python install · Works on any browser</div>
+  </div>
+
+  <div class="cap-zone">
+    <div class="cap-pill" id="capPill"></div>
+  </div>
+</div>
+
+<script>
+let MANIFEST = null;
+let GROUPS = [];
+
+function groupWords(words) {
+  const out = [];
+  let cur = [];
+  for (const w of words) {
+    cur.push(w);
+    const endP = /[।?!.,]$/.test(w.text);
+    const len = cur.reduce((a, b) => a + b.text.length, 0);
+    if (endP || cur.length >= 4 || (cur.length >= 2 && len > 18)) {
+      out.push(cur);
+      cur = [];
+    }
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
+window.initDoc = function(m) {
+  MANIFEST = m;
+  GROUPS = groupWords(m.words || []);
+};
+
+const BEAT_META = {
+  hook: {
+    head: '724 Students Updated in <span class="gold">30 Mins!</span>',
+    badge: 'NO CODING · FREE AUTOMATION',
+    chip: '● LIVE PROGRESS',
+    main: 'UDISE+ General Profile Bulk Automation',
+    sub: 'Save hours of manual portal data entry',
+  },
+  colab: {
+    head: 'Zero Install: Runs on <span class="gold">Google Colab</span>',
+    badge: 'NO PYTHON / SELENIUM ERRORS',
+    chip: '● CLOUD NOTEBOOK',
+    main: 'Works on Any Laptop (Windows or Mac)',
+    sub: 'Free Google cloud RAM & API background speed',
+  },
+  safe_auth: {
+    head: '100% Safe: <span class="gold">Zero Password</span> Needed',
+    badge: 'TEMPORARY BROWSER COOKIE ONLY',
+    chip: '● SESSION AUTH',
+    main: 'Paste JSESSIONID Cookie & School URL',
+    sub: 'Expires automatically when you log out',
+  },
+  three_in_one: {
+    head: '3-in-1 <span class="gold">UDISE+</span> Power Suite',
+    badge: 'GP + PEN SEARCH + BULK IMPORT',
+    chip: '● ALL-IN-ONE TOOL',
+    main: 'Aadhaar PEN Search + Eligibility Check + Excel GP',
+    sub: '95%+ auto-success rate with clear error logs',
+  },
+  cta: {
+    head: 'Watch Full <span class="gold">Step-by-Step</span> Guide',
+    badge: 'LINK IN DESCRIPTION & TELEGRAM',
+    chip: '● FREE GUIDE PDF',
+    main: 'Join Eternal Student Telegram for Support',
+    sub: 'Enrollment & Facility modules auto-update free',
+  },
+};
+
+window.seekToMs = function(tMs) {
+  if (!MANIFEST) return;
+  document.getElementById("progFill").style.width = `${Math.min(100, Math.max(0, (tMs / MANIFEST.total_ms) * 100))}%`;
+
+  let active = MANIFEST.beats[0];
+  for (const b of MANIFEST.beats) {
+    if (tMs >= b.start_ms - 40) active = b;
+  }
+  const meta = BEAT_META[active.beat_id] || BEAT_META.hook;
+  document.getElementById("headline").innerHTML = meta.head;
+  document.getElementById("stepBadge").textContent = meta.badge;
+  document.getElementById("liveChip").textContent = meta.chip;
+  document.getElementById("infoMain").textContent = meta.main;
+  document.getElementById("infoSub").textContent = meta.sub;
+
+  const pill = document.getElementById("capPill");
+  let grp = null;
+  for (const g of GROUPS) {
+    if (tMs >= g[0].start_ms - 80 && tMs <= g[g.length - 1].end_ms + 220) {
+      grp = g;
+      break;
+    }
+  }
+  if (!grp) {
+    pill.style.opacity = "0";
+  } else {
+    pill.style.opacity = "1";
+    pill.innerHTML = grp.map(w => {
+      const act = tMs >= w.start_ms - 30 && tMs <= w.end_ms + 50;
+      return `<span class="cap-word ${act ? "active" : ""}">${w.text}</span>`;
+    }).join("");
+  }
+};
+</script>
+</body>
+</html>

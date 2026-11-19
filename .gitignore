@@ -13,6 +13,7 @@ output/*.png
 output/frames/
 tmp/
 build/
+input/
 *.blend1
 
 # Secrets & API keys
