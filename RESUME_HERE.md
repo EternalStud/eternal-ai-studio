@@ -84,8 +84,21 @@
   - `config/pronunciation_lexicon.json` + `audio/tts_and_captions.py`: Phonetic Devanagari lexicon mapping (`IRCTC`, `CRIS`, `SQL`, `Mutex`, `Redis`, `OTP`, `CAPTCHA`) while preserving crisp technical spelling in synced captions.
   - `engine/qa_auditor.py`: Automated `DOM_QA` (`IoU == 0.0`, zero Zone-E leakage), `PIXEL_QA`, and `POST_QA` (`1080×1920`, `duration_s: 113.25`, `lufs: -14.6`, `true_peak_dbfs: -1.3`, `passed: true`).
 - **Verified:** Spot frames (`--spot-only`), cut boundary frames, and final MP4 frames (`v10.png`, `v66.png`, `v96.png`) all visually inspected cleanly.
+- **User Feedback (Episode 01 Rejected):** Mixing `stick-scene` + 3D scenes looked ugly; pivoted to editing the user's real Final Cut Pro UDISE+ screen recording (`input/`).
 
-## Next Steps (When User Returns After Watching Episode 01)
-1. **User Reviews Episode 01** (`output/ep01_tatkal_concurrency_1080x1920.mp4`) and evaluates engagement, pacing (`113s`), stick-figure + 3D + CSS3D blend, and Hindi narration quality.
-2. **If Approved:** Add automated `engine/research_engine.py` + `engine/semantic_director.py` CLI wrappers so passing **any new topic** spawns Episode 02+ cleanly, and evaluate Google Colab GPU bursting (`CMP-001`) + optional human voiceover / Maono mic polish.
-3. **Distribution Gate (Still Held Until Quality Approved):** Only connect YouTube / Instagram / Facebook publishing once you give final green light.
+---
+
+### UDISE+ Automation Tutorial Edit & Voicebox Hindi Short (COMPLETE)
+- **Raw Input:** `input/udise+ automation GP, PEN search , Udise Import.mov` (`613.4 MB`, `1920×960 @ 60fps`, `1031.63s` / `17m 11s`)
+- **Deliverable 1 — Full Master Edited Tutorial (`scripts/edit_udise_pro_master.py`):**
+  - **Output:** `output/udise_automation_master_edited.mp4` (`62.3 MB`, `1920×1080 @ 60fps`, `760.29s` / `12.65m`, `-14.1 LUFS`)
+  - **Voice:** Preserved user's genuine human voiceover (rejected robotic `edge-tts`) with broadcast vocal EQ + noise reduction (`highpass=85, lowpass=12500, afftdn=nf=-24, acompressor, loudnorm=-14`).
+  - **Edits & Privacy:** Moved `"724 students updated in 30 mins"` social-proof hook to `00:00`, cut giant `"Join telegram Channel"` text overlay (`15.5–26.0s`), static PDF monologue (`16.5–142.5s`), server/RAM monologue (`219.5–262.0s`), login-fail stumble (`422.5–441.5s`), Inspect fumble (`659.5–665.8s`), and summer-vacation outro (`998.0–1031.6s`); zoomed `1920×1080` to strip macOS bar/pillars; blurred sensitive `UDISE Code`, `JSESSIONID`, `School ID` URL, `COOKIE_HEADER`, and `ENCRYPT_KEY`; added lower-third chapter & Telegram banners.
+- **Deliverable 2 — Vertical YouTube Short (`scripts/render_udise_short_voicebox.py` + `scenes/udise_short_hud.html`):**
+  - **Output:** `output/udise_automation_yt_short_1080x1920.mp4` (`2.5 MB`, `1080×1920 @ 30fps`, `38.50s`, `-14.9 LUFS`)
+  - **Voice:** Local **Voicebox `chatterbox`** Hindi voice (`Notebook LLM hindi` profile, cached in `~/.cache/huggingface/hub/models--ResembleAI--chatterbox`) with `-450ms` tail puff trimming and `-14 LUFS` mastering.
+  - **Visuals & Privacy:** Frosted glass HUD over zoomed portal/Colab/DevTools screen clips with synced 4-word gold-highlighted Hindi captions and `avgblur` over both `JSESSIONID` and `UDISE Code`.
+
+## Next Steps
+1. **User Reviews UDISE+ Deliverables:** Watch [output/udise_automation_master_edited.mp4](output/udise_automation_master_edited.mp4) and [output/udise_automation_yt_short_1080x1920.mp4](output/udise_automation_yt_short_1080x1920.mp4) and publish to YouTube / Shorts using the ready-to-paste chapter timestamps.
+2. **Next Content Format:** Keep real screen recordings + polished human audio (user mic or Voicebox Chatterbox Hindi) + clean Glass HUD overlays rather than stick-figure + 3D mashups.
