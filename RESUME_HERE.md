@@ -99,6 +99,21 @@
   - **Voice:** Local **Voicebox `chatterbox`** Hindi voice (`Notebook LLM hindi` profile, cached in `~/.cache/huggingface/hub/models--ResembleAI--chatterbox`) with `-450ms` tail puff trimming and `-14 LUFS` mastering.
   - **Visuals & Privacy:** Frosted glass HUD over zoomed portal/Colab/DevTools screen clips with synced 4-word gold-highlighted Hindi captions and `avgblur` over both `JSESSIONID` and `UDISE Code`.
 
+---
+
+### Google Colab 6-Minute 16:9 Masterclass & Blender Lab MCP Skill (COMPLETE)
+- **Output:** `output/google_colab_masterclass_16x9.mp4` (`195.8 MB`, `1920×1080 @ 24fps`, `366.40s` / `6m 06s`, `-14 LUFS`, 28 dialogue beats)
+- **Blender Lab MCP & Project Skill:**
+  - Installed official `lab_blender_org/mcp` (`v1.0.3`, `localhost:9876`) in Blender 5.3.0, synced `projects.blender.org/lab/blender_mcp` (`v1.0.2`) to `/Volumes/Eternal T7/PROJECT/blender_mcp`, configured `/Users/eternalstudent/.gemini/config/mcp_config.json`, and wrote `.agents/skills/blender/SKILL.md`.
+- **Voices & Audio Mastering (`scripts/build_colab_audio.py`):**
+  - **Male Primary Host (25 beats):** `ChatterboxMultilingualTTS` cloned from `Notebook LLM hindi`, synthesized on Google Colab T4 (`colab-audio`), trimmed via RMS trailing-silence detection (`+140ms` breathing pad—zero clipped final syllables).
+  - **Female Co-Host Interrupts (3 beats):** `maya-research/Veena` **`kavya`** (`b03`, `b15`, `b21`) synthesized on Google Colab T4 (`colab-bench`).
+  - Mixed with stereo ambient SFX (`audio/sfx_gen.py`) and mastered to `-14 LUFS`.
+- **Visual Architecture (`scenes/colab_hero_worlds.py`, `scenes/colab_motion_ui.html`, `scenes/colab_hud_16x9.html`, `scripts/build_colab_video.py`):**
+  - 5 Blender 5.3 3D hero clips (`w1_oom`, `w1_ok`, `w2_dc`, `w3_cpugpu`, `w4_vault`) with crisp Playwright display textures (`scripts/generate_screen_textures.py`) and visually inspected previews (`w1_desk..w4_vault`).
+  - 4 interactive `1920×1080` animated UI scenes incorporating authentic verified Colab T4 benchmark numbers (`4096×4096 FP32 ×15`: **CPU `17.94s` vs Tesla T4 `0.522s`, `34.4× faster`**).
+  - Verified final output frames (`v_10..v_295`) and audio slices (`a_24_42.mp3`, `a_end.mp3`).
+
 ## Next Steps
-1. **User Reviews UDISE+ Deliverables:** Watch [output/udise_automation_master_edited.mp4](output/udise_automation_master_edited.mp4) and [output/udise_automation_yt_short_1080x1920.mp4](output/udise_automation_yt_short_1080x1920.mp4) and publish to YouTube / Shorts using the ready-to-paste chapter timestamps.
-2. **Next Content Format:** Keep real screen recordings + polished human audio (user mic or Voicebox Chatterbox Hindi) + clean Glass HUD overlays rather than stick-figure + 3D mashups.
+1. **User Reviews `google_colab_masterclass_16x9.mp4`:** Watch [output/google_colab_masterclass_16x9.mp4](output/google_colab_masterclass_16x9.mp4) and evaluate pacing, dual-voice naturalness (`Notebook LLM hindi` + `Veena kavya`), 16:9 visuals, and YouTube long-form monetization fit.
+2. **Next Content Strategy:** Scale reusable `1920×1080` explainer + live-benchmarked tutorial format (and optional `60s` vertical Shorts cutdowns) with real audio/Veena+Chatterbox dialogue.

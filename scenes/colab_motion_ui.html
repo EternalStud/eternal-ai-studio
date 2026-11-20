@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1920px; height: 1080px; overflow: hidden;
+    background: radial-gradient(circle at 50% 25%, #0c172c 0%, #050914 70%, #03060d 100%);
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  }
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .stage {
+    position: absolute; inset: 95px 80px 115px 80px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scene { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; gap: 28px; }
+  .scene.active { display: flex; }
+
+  .glass-card {
+    background: rgba(11, 18, 34, 0.86);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 24px;
+    padding: 36px 42px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+  }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .kicker { font-size: 18px; letter-spacing: 0.14em; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 10px; }
+  .h1 { font-size: 46px; font-weight: 800; line-height: 1.15; }
+  .sub { font-size: 24px; color: #94a3b8; margin-top: 8px; }
+
+  /* Scene 1: Browser <-> WebSocket <-> Ubuntu VM */
+  .arch-row { display: grid; grid-template-columns: 460px 1fr 620px; align-items: center; gap: 24px; }
+  .node-box {
+    background: rgba(15, 23, 42, 0.92); border: 2px solid #334155; border-radius: 22px; padding: 30px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .node-box.cloud { border-color: rgba(16, 185, 129, 0.65); box-shadow: 0 0 50px rgba(16,185,129,0.16); }
+  .pill-tag { display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 16px; font-weight: 700; width: fit-content; }
+  .pill-blue { background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4); }
+  .pill-green { background: rgba(16,185,129,0.16); color: #34d399; border: 1px solid rgba(16,185,129,0.45); }
+  .pill-amber { background: rgba(245,158,11,0.16); color: #fbbf24; border: 1px solid rgba(245,158,11,0.45); }
+  .pill-red { background: rgba(239,68,68,0.16); color: #f87171; border: 1px solid rgba(239,68,68,0.45); }
+
+  .pipe-lane { position: relative; height: 110px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .pipe-track { width: 100%; height: 6px; background: rgba(56,189,248,0.22); border-radius: 99px; position: relative; overflow: visible; }
+  .packet {
+    position: absolute; top: -11px; width: 28px; height: 28px; border-radius: 50%;
+    background: radial-gradient(circle, #fde68a 0%, #f59e0b 65%, transparent 100%);
+    box-shadow: 0 0 24px #f59e0b;
+  }
+  .pipe-lbl { margin-top: 22px; font-size: 18px; color: #bae6fd; font-weight: 700; text-align: center; }
+
+  .vm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+  .vm-stat { background: #07111f; border: 1px solid #1e293b; border-radius: 14px; padding: 14px 18px; }
+  .vm-stat .lbl { font-size: 14px; color: #94a3b8; }
+  .vm-stat .val { font-size: 26px; font-weight: 800; color: #34d399; margin-top: 4px; }
+
+  /* Scene 2: Benchmark Race + TPU */
+  .race-bar-wrap { background: #070d1a; border: 1px solid #1e293b; border-radius: 16px; padding: 24px 28px; }
+  .bar-bg { height: 40px; background: #0f172a; border-radius: 10px; overflow: hidden; margin-top: 12px; position: relative; }
+  .bar-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; padding-left: 16px; font-weight: 800; font-size: 20px; }
+  .bar-cpu { background: linear-gradient(90deg, #dc2626, #f59e0b); }
+  .bar-gpu { background: linear-gradient(90deg, #059669, #34d399); }
+
+  /* Scene 3: Notebook Terminal + Speed + @param */
+  .nb-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 28px; }
+  .code-cell {
+    background: #070b14; border: 1px solid #1e293b; border-left: 5px solid #38bdf8;
+    border-radius: 16px; padding: 22px 26px; font-size: 21px; line-height: 1.65;
+  }
+  .code-out { background: #040911; border: 1px solid #1e293b; border-radius: 14px; padding: 18px 22px; margin-top: 14px; font-size: 19px; color: #6ee7b7; }
+  .param-row { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 14px 20px; border-radius: 12px; margin-top: 12px; border: 1px solid #334155; }
+
+  /* Scene 4: Security & Limits */
+  .split-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+  .list-item { font-size: 23px; line-height: 1.5; padding: 14px 18px; border-radius: 12px; background: rgba(15,23,42,0.8); border: 1px solid rgba(148,163,184,0.18); margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="stage">
+
+  <!-- UI SCENE A: Browser <-> WebSocket <-> Ubuntu Container -->
+  <div class="scene" id="sc-arch">
+    <div class="glass-card">
+      <div class="kicker">UNDER THE HOOD · HOW COLAB ACTUALLY RUNS YOUR CODE</div>
+      <div class="h1">Chrome Is Only a Remote Control — Python Lives on Google's VM</div>
+    </div>
+    <div class="arch-row">
+      <div class="node-box">
+        <span class="pill-tag pill-blue">YOUR BROWSER TAB</span>
+        <div style="font-size:32px;font-weight:800;">colab.research.google.com</div>
+        <div class="mono" style="font-size:19px;color:#cbd5e1;background:#070c17;padding:16px;border-radius:12px;">
+          [1] import torch<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;model = load_ai()<br/>
+          <span style="color:#fbbf24;">▶ Shift + Enter</span>
+        </div>
+        <div class="vm-stat">
+          <div class="lbl">LOCAL LAPTOP CPU / RAM</div>
+          <div class="val" style="color:#38bdf8;">Only ~8% Load</div>
+        </div>
+      </div>
+
+      <div class="pipe-lane">
+        <div class="pipe-track"><div class="packet" id="pkt1"></div></div>
+        <div class="pipe-lbl mono">WebSocket JSON Payload<br/><span style="color:#94a3b8;font-size:15px;">Zero heavy local compute</span></div>
+      </div>
+
+      <div class="node-box cloud">
+        <span class="pill-tag pill-green">GOOGLE CLOUD CONTAINER (4s BOOT)</span>
+        <div style="font-size:32px;font-weight:800;">Ubuntu 22.04 + IPython Kernel</div>
+        <div class="vm-grid">
+          <div class="vm-stat"><div class="lbl">SYSTEM RAM</div><div class="val">12.7 GB</div></div>
+          <div class="vm-stat"><div class="lbl">TESLA T4 VRAM</div><div class="val">15.36 GB</div></div>
+          <div class="vm-stat"><div class="lbl">LOCAL VM DISK</div><div class="val">107.7 GB</div></div>
+          <div class="vm-stat"><div class="lbl">KERNEL STATE</div><div class="val" style="color:#fbbf24;">Variables Live</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI SCENE B: Live Measured CPU vs T4 GPU Benchmark + TPU -->
+  <div class="scene" id="sc-bench">
+    <div class="glass-card">
+      <div class="kicker">VERIFIED LIVE GOOGLE COLAB HARDWARE BENCHMARK</div>
+      <div class="h1">4096 × 4096 FP32 Matrix Multiplication (15 Passes)</div>
+      <div class="sub">Real execution timing captured directly inside Google Colab runtime</div>
+    </div>
+    <div class="glass-card" style="display:flex;flex-direction:column;gap:24px;">
+      <div class="race-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:26px;font-weight:700;">
+          <span>Default Colab CPU (Sequential Threads)</span>
+          <span class="mono" style="color:#f87171;" id="cpuNum">17.94s</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill bar-cpu" id="cpuBar" style="width:94%;">17.94 seconds</div></div>
+      </div>
+      <div class="race-bar-wrap" style="border-color:rgba(16,185,129,0.5);">
+        <div style="display:flex;justify-content:space-between;font-size:26px;font-weight:700;">
+          <span>NVIDIA Tesla T4 GPU (2,560 Parallel CUDA Cores)</span>
+          <span class="mono" style="color:#34d399;" id="gpuNum">0.522s · 34.4× FASTER ✓</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill bar-gpu" id="gpuBar" style="width:14%;">0.52s</div></div>
+      </div>
+      <div style="display:flex;gap:20px;">
+        <div class="vm-stat" style="flex:1;border-color:#0ea5e9;"><div class="lbl">CHECK RUNTIME FIRST</div><div class="val" style="font-size:22px;color:#38bdf8;">Runtime → Change runtime type → T4 GPU</div></div>
+        <div class="vm-stat" style="flex:1;border-color:#a855f7;"><div class="lbl">FOR MASSIVE DEEP LEARNING</div><div class="val" style="font-size:22px;color:#c084fc;">Google TPU v2/v5e Custom Tensor Chip</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI SCENE C: Hidden Superpowers (!shell, !nvidia-smi, Cloud Backbone, #@param) -->
+  <div class="scene" id="sc-powers">
+    <div class="glass-card">
+      <div class="kicker">HIDDEN COLAB SUPERPOWERS EVERY USER SHOULD KNOW</div>
+      <div class="h1">Full Linux Terminal (!), Data Center Net &amp; No-Code #@param UI</div>
+    </div>
+    <div class="nb-grid">
+      <div class="glass-card">
+        <span class="pill-tag pill-green" style="margin-bottom:14px;">POWER 1 &amp; 2 · TERMINAL ACCESS (!)</span>
+        <div class="code-cell mono">
+          <div><span style="color:#38bdf8;">!</span>nvidia-smi <span style="color:#64748b;"># Confirm GPU attached</span></div>
+          <div><span style="color:#38bdf8;">!</span>pip install transformers yt-dlp ffmpeg-python</div>
+          <div><span style="color:#38bdf8;">!</span>wget https://huggingface.co/.../model.safetensors</div>
+        </div>
+        <div class="code-out mono">
+          Tesla T4, 15360 MiB · Driver 580.82.07 ✓<br/>
+          Downloading model.safetensors (2.4 GB)...<br/>
+          <span style="color:#fbbf24;font-weight:800;">Backbone Speed: 412 MB/s · Done in 5.8s! (0 MB Mobile Data Used)</span>
+        </div>
+      </div>
+      <div class="glass-card">
+        <span class="pill-tag pill-amber" style="margin-bottom:14px;">POWER 3 &amp; 4 · #@param NO-CODE FORMS</span>
+        <div class="code-cell mono" style="font-size:19px;">
+          runtime = "T4 GPU" <span style="color:#fbbf24;">#@param ["CPU","T4 GPU","TPU"]</span><br/>
+          batch_size = 32 <span style="color:#fbbf24;">#@param {type:"slider", min:8, max:128}</span>
+        </div>
+        <div style="margin-top:16px;font-size:18px;color:#94a3b8;font-weight:700;">AUTO-GENERATED COLAB FORM UI ↓</div>
+        <div class="param-row"><span style="font-size:20px;">runtime</span><span class="mono" style="background:#1e293b;padding:6px 16px;border-radius:8px;color:#38bdf8;">T4 GPU ▾</span></div>
+        <div class="param-row"><span style="font-size:20px;">batch_size</span><span class="mono" style="color:#fbbf24;">━━━━━━●━━━ 32</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI SCENE D: Security, Drive Mount & Honest Limits -->
+  <div class="scene" id="sc-safe">
+    <div class="glass-card">
+      <div class="kicker">SURVIVAL GUIDE &amp; HONEST REALITY CHECK</div>
+      <div class="h1">Stop Losing Files Every 12 Hours &amp; Protect Your API Keys</div>
+    </div>
+    <div class="split-2">
+      <div class="glass-card" style="border-color:rgba(16,185,129,0.5);">
+        <span class="pill-tag pill-green">FIX 1 · PERSISTENT STORAGE + 🔑 SECRETS</span>
+        <div class="code-cell mono" style="margin-top:18px;font-size:19px;">
+          <span style="color:#64748b;"># 1. Prevent 90m idle / 12h VM wipeout</span><br/>
+          <span style="color:#c084fc;">from</span> google.colab <span style="color:#c084fc;">import</span> drive<br/>
+          drive.mount(<span style="color:#34d399;">'/content/drive'</span>)<br/><br/>
+          <span style="color:#64748b;"># 2. Never paste API keys in plain code!</span><br/>
+          <span style="color:#c084fc;">from</span> google.colab <span style="color:#c084fc;">import</span> userdata<br/>
+          key = userdata.get(<span style="color:#fbbf24;">'API_KEY'</span>)
+        </div>
+      </div>
+      <div class="glass-card" style="border-color:rgba(245,158,11,0.45);">
+        <span class="pill-tag pill-amber">WHEN TO USE COLAB VS A REAL SERVER</span>
+        <div class="list-item" style="border-color:rgba(16,185,129,0.45);"><strong style="color:#34d399;">✓ USE COLAB:</strong> AI / LLM experiments, Python bulk automation, heavy data cleanup, free GPU bursts.</div>
+        <div class="list-item" style="border-color:rgba(239,68,68,0.45);"><strong style="color:#f87171;">✗ AVOID COLAB FOR:</strong> 24/7 websites, always-on Discord/Telegram bots, or unlimited un-throttled mining/hosting.</div>
+        <div class="list-item" style="border-color:rgba(56,189,248,0.4);"><strong style="color:#38bdf8;">⚡ PRO TIP:</strong> 90-min idle or 12-hr max deletes <code>/content/</code> — always save checkpoints to Drive!</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let SPEC = null;
+window.initDoc = (spec) => { SPEC = spec; window.seekToMs(0); };
+
+window.seekToMs = (ms) => {
+  // Determine which scene ID is active
+  const scId = (SPEC && SPEC.scene) || "sc-arch";
+  for (const el of document.querySelectorAll(".scene")) {
+    el.classList.toggle("active", el.id === scId);
+  }
+  const prog = Math.max(0, Math.min(1, ((ms % 4000) / 4000)));
+  const pkt = document.getElementById("pkt1");
+  if (pkt) {
+    pkt.style.left = `calc(${(prog * 94).toFixed(1)}% )`;
+  }
+  // Animate race bars smoothly over first 3s of sc-bench
+  const rProg = Math.max(0.08, Math.min(1, ms / 3200));
+  const gpuP = Math.max(0.1, Math.min(1, ms / 450));
+  const cb = document.getElementById("cpuBar");
+  const gb = document.getElementById("gpuBar");
+  if (cb && gb && scId === "sc-bench") {
+    cb.style.width = (92 * rProg).toFixed(1) + "%";
+    gb.style.width = (14 * gpuP).toFixed(1) + "%";
+  }
+};
+</script>
+</body>
+</html>
