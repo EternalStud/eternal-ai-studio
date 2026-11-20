@@ -29,7 +29,7 @@
 - Your existing ecosystem ([`eternal-master-wiki`](https://github.com/EternalStud/eternal-master-wiki)) is a rare real-world story: running 5 production services 24/7 on a Samsung Galaxy M31 + Cloudflare Tunnel + Mac Mini M2.
 - Pairing short 3D architecture breakdowns (made in Blender!) with real screen recordings of your Termux/Mac Mini setup appeals directly to developers and tech buyers—a niche that attracts **paid tool sponsorships** even at 5K–20K views per video.
 
-## 3. Immediate Next Experiment Queue (After You Review POC #1)
-1. **POC #1 Critique & V2 Polish:** Upgrade voice (test `Voicebox` / Maono mic vs `edge-tts`), refine camera/typography/HUD overlays (e.g., animated SVG/HTML HUD badges composited cleanly over 3D!).
-2. **POC #2 (16:9 Long-Form Test or Second Short):** *"How Credit Cards Charge 3% on Every Swipe (3D Money Flow)"* or *"How One Decimal Bug Destroyed a $370M Rocket (3D Crash Breakdown)"*.
-3. **First Digital Product Test:** Bundle 5 modular Blender `bpy` explainer scenes + render templates into a downloadable `.zip` preview for Gumroad.
+### 2. Core Quality & Visual-Fit Gates Before Publishing
+- **Topic-First Skill Selection:** Always analyze the topic first to decide whether Blender 3D, real screen recordings, archival media, or custom frame-by-frame HTML5 Canvas data animation fits best—never force generic 3D loops over software/conceptual explainers (`google_colab_masterclass_16x9.mp4` lesson).
+- **Voice Standard Approved:** Use your real cleaned voice for screen tutorials, or our verified dual-voice Hinglish stack (**`Notebook LLM hindi` Chatterbox** male + **`Veena kavya`** female) for explainers.
+- **Per-Beat Bespoke Visuals:** Every beat in a `2-minute` (`1080×1920`) Short or `6–10 min` (`1920×1080`) deep-dive must advance a dedicated visual tied directly to the sentence spoken—zero recycled background loops.

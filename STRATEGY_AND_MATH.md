@@ -8,12 +8,12 @@
 ## What Actually Works With Our Exact Mac Mini + AI Setup
 We focus on **High-Craft Visual Explainers + Digital Product Leverage**:
 
-### Vector 1: Hybrid 3D + Glass HUD Visual Explainers (Blender `bpy` + Playwright HUD + Conversational Hindi / English)
-- **Validated Format Learnings (from POC #1–#3 & Reference Benchmark `154.6s`):**
-  - **Optimal Duration (`90–150s` / `1.5–2.5 min`):** `<50s` feels rushed and leaves viewers without full comprehension; `90–150s` enables relatable real-world scene hooks, physical metaphors before jargon, and a memorable final stack reveal (plus works natively on Facebook Reels, Instagram Reels, and YouTube's up-to-3-min Shorts / mid-length vertical feed).
-  - **Lived-In Worlds > Abstract Shapes:** Opening in a recognizable human setting (Chai Tapri, underground fiber trench, Diwali balcony, NYSE archival desk) outperforms glowing geometric blocks by orders of magnitude.
-  - **Warm Conversational Voice > Fancy Broadcaster English:** Calm, relatable Hindi narration paired with crisp transparent Glass HUD callout pills (`0000.0 ms`, `100× slow`, floating annotations) avoids covering artwork with noisy karaoke boxes.
-  - **Hybrid Cost / Speed Balance on M2 (8 GB):** Pure 1,555-frame Blender EEVEE + Playwright HUD takes ~24 minutes locally at `24fps` / `16 samples`. Blending Blender 3D hero shots with fast Playwright HTML/CSS3D/Canvas explainer shots cuts 120–150s production render time to ~12–20 minutes on M2!
+### Vector 1: Topic-Matched Visual Explainers (Per-Beat Bespoke Motion / Selective 3D + Dual-Voice Hinglish)
+- **Validated Format Learnings (from POC #1–#3, Colab 6-Min Masterclass, & Gold Benchmark `154.6s`):**
+  - **Topic-First Tool Selection:** Analyse the topic *first* before touching Blender. Software/algorithm/map/data stories belong in **dedicated per-beat HTML5 Canvas/SVG animations or authentic zoomed screen captures**; reserve **Blender 3D** strictly for physical/spatial environments where 3D depth truly adds clarity (never stretch generic 3D loops across unrelated beats).
+  - **Optimal Short-Form Deep Explainer (`90–150s` / `2 min` @ `1080×1920`):** `<50s` feels rushed; `~120s` gives room for real curiosity hooks, intuitive mechanisms, surprising real-world proof (e.g., Berlin 99-phone Maps experiment), and high-save takeaways while staying native on YouTube Shorts (`<= 3 min`), Instagram Reels, and Facebook.
+  - **Approved Dual-Voice Pipeline:** Warm male narration (`Chatterbox` `Notebook LLM hindi` on Colab T4) + natural female viewer-doubt interrupts (`maya-research/Veena` `kavya`), trimmed via RMS silence detection and mastered at `-14 LUFS`.
+  - **Zero Visual Repetition ("1 Beat = 1 Unique Visual Scene"):** Every `6–10s` narrative beat must display its own bespoke visual stage synced cleanly to the voice.
 - **Niche:** *Aise Kaam Karta Hai / How Money, Tech & Engineering Actually Work* (UPI internals, fintech systems, famous engineering/financial disasters, everyday hidden tech).
 - **Double Monetization:**
   1. Audience growth on Reels/Shorts + companion horizontal YouTube deep-dives (`$4–$12+` RPM in global/English variants, sponsorships in Hindi tech/finance).

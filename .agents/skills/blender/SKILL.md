@@ -2,14 +2,24 @@
 name: blender
 description: >-
   Studio runbook and quality workflow for Blender 5.3+ 3D scenes in eternal-ai-studio,
-  covering the official Blender Lab MCP Server (`lab_blender_org/mcp` on localhost:9876),
+  covering Topic-First suitability checks, the official Blender Lab MCP Server (`lab_blender_org/mcp`),
   iterative live viewport verification, and Apple M2 (8 GB RAM) headless EEVEE rendering rules.
-  Use when designing, inspecting, framing, debugging, or rendering 3D scenes with Blender.
+  Use ONLY AFTER analysing the video topic confirms that 3D spatial anatomy or physical environments
+  genuinely serve the explainer better than 2D Canvas motion graphics or real screen recordings.
 ---
 
 # Eternal AI Studio — Blender 5.3 & Official Blender Lab MCP Workflow
 
-This skill governs all 3D scene work in `eternal-ai-studio` on **Blender 5.3.0** (`/opt/homebrew/bin/blender`, add-on `lab_blender_org/mcp v1.0.3`), using [blender_studio_kit.py](file:///Volumes/Eternal%20T7/PROJECT/eternal-ai-studio/engine/blender_studio_kit.py) and the official [blender_mcp](file:///Volumes/Eternal%20T7/PROJECT/blender_mcp) server.
+## 0. Topic-Fit Gate (Analyse Before Using This Skill!)
+
+**Do NOT default to Blender for every video.** First analyse the topic:
+- **Use Blender 3D when:** The story relies on physical world realism, spatial camera movement through hardware/architecture, or tangible physical scale (`@fewshot.studio` style).
+- **Skip Blender 3D when:** Explaining software/browser workflows (`Google Colab`, `UDISE+`), maps, timelines, or algorithms best taught with **bespoke per-beat Canvas/SVG motion diagrams** or **authentic zoomed screen captures**.
+- **Anti-Repetition Rule:** Never render 4–5 small 3D loops and repeat them across dozens of unrelated beats (`google_colab_masterclass_16x9.mp4` lesson). Every 3D shot must directly illustrate the exact sentence being spoken.
+
+---
+
+This skill governs all approved 3D scene work in `eternal-ai-studio` on **Blender 5.3.0** (`/opt/homebrew/bin/blender`, add-on `lab_blender_org/mcp v1.0.3`), using [blender_studio_kit.py](file:///Volumes/Eternal%20T7/PROJECT/eternal-ai-studio/engine/blender_studio_kit.py) and the official [blender_mcp](file:///Volumes/Eternal%20T7/PROJECT/blender_mcp) server.
 
 ## 1. Live MCP Server Architecture (Already Installed & Wired)
 

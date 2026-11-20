@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px; height: 1920px; overflow: hidden;
+    background: #050a14; color: #f8fafc;
+    font-family: "Kohinoor Devanagari", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  }
+  canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+
+  .top-hud {
+    position: absolute; top: 54px; left: 44px; right: 44px;
+    display: flex; justify-content: space-between; align-items: center;
+    pointer-events: none;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(7, 13, 25, 0.84);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 11px 22px; border-radius: 999px;
+    font-size: 21px; font-weight: 700; letter-spacing: 0.05em;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #10b981; box-shadow: 0 0 12px #10b981; }
+  .dot.red { background: #ef4444; box-shadow: 0 0 14px #ef4444; }
+  .dot.amber { background: #f59e0b; box-shadow: 0 0 14px #f59e0b; }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  .title-band {
+    position: absolute; top: 130px; left: 48px; right: 48px; text-align: center;
+    pointer-events: none;
+  }
+  .scene-kicker {
+    font-size: 22px; font-weight: 800; letter-spacing: 0.14em; color: #38bdf8;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .scene-head {
+    font-size: 46px; font-weight: 800; line-height: 1.15;
+    text-shadow: 0 6px 24px rgba(0,0,0,0.75);
+  }
+
+  /* Subtitles anchored in Zone D (y=1490..1710), keeping Zone E (1730..1920) 100% clear for Shorts/Reels UI */
+  .sub-wrap {
+    position: absolute; bottom: 215px; left: 52px; right: 52px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    pointer-events: none;
+  }
+  .kavya-tag {
+    display: none;
+    background: rgba(245, 158, 11, 0.22);
+    border: 1px solid rgba(251, 191, 36, 0.78);
+    color: #fde68a; padding: 6px 18px; border-radius: 999px;
+    font-size: 20px; font-weight: 800; letter-spacing: 0.08em;
+  }
+  .kavya-tag.show { display: inline-block; }
+  .sub-box {
+    background: rgba(6, 11, 22, 0.88);
+    border: 1px solid rgba(148, 163, 184, 0.30);
+    border-radius: 20px; padding: 18px 28px;
+    font-size: 35px; font-weight: 700; line-height: 1.38; text-align: center;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.62);
+  }
+  .hl { color: #fbbf24; font-weight: 800; }
+  .pbar-bg { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: rgba(255,255,255,0.08); }
+  .pbar { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #38bdf8, #ef4444, #fbbf24); }
+</style>
+</head>
+<body>
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="pbar-bg"><div class="pbar" id="pbar"></div></div>
+
+<div class="top-hud">
+  <div class="pill"><span class="dot" id="topDot"></span><span>AISE KAAM KARTA HAI</span></div>
+  <div class="pill mono" id="topMetric" style="color:#fbbf24;">MAPS TELEMETRY</div>
+</div>
+
+<div class="title-band">
+  <div class="scene-kicker" id="kicker">CHAPTER 01</div>
+  <div class="scene-head" id="head">Empty Road Ahead — Yet Red Jam?</div>
+</div>
+
+<div class="sub-wrap">
+  <div class="kavya-tag" id="kavyaTag">VIEWER DOUBT · KAVYA</div>
+  <div class="sub-box" id="subBox"></div>
+</div>
+
+<script>
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+
+const BEAT_META = {
+  t01: { kicker: "01 · THE TRAFFIC MYSTERY", head: "Road Empty Ahead — Yet Red Jam?", metric: "3.0 KM AHEAD", dot: "red" },
+  t02: { kicker: "02 · MYTH BUSTED", head: "Not Satellites. Crowdsourced Phones.", metric: "GPS CROWD MESH", dot: "" },
+  t03: { kicker: "03 · PRIVACY QUESTION", head: "Does Google See Your Name & Number?", metric: "PRIVACY CHECK", dot: "amber" },
+  t04: { kicker: "04 · ANONYMOUS PING", head: "Only 3 Numbers Sent Every 5 Seconds", metric: "PING CYCLE: 5.0s", dot: "" },
+  t05: { kicker: "05 · CONGESTION TRIGGER", head: "25 Phones Drop 50 → 12 km/h = RED", metric: "AVG: 12 KM/H", dot: "red" },
+  t06: { kicker: "06 · TIME TRAVEL DATA", head: "Live Speed vs. 52 Tuesdays Baseline", metric: "HISTORICAL OVERLAY", dot: "amber" },
+  t07: { kicker: "07 · GRAPH NEURAL AI", head: "Predicting Upstream Jam Ripples", metric: "GRAPH AI ENGINE", dot: "red" },
+  t08: { kicker: "08 · BERLIN 2020 EXPERIMENT", head: "99 Unlocked Phones in a Red Handcart", metric: "SPEED: 3.0 KM/H", dot: "amber" },
+  t09: { kicker: "09 · THE GHOST TRAFFIC JAM", head: "Zero Cars on Road — Maps Turns Crimson!", metric: "GHOST JAM +38m", dot: "red" },
+  t10: { kicker: "10 · MODERN AI DEFENSES", head: "Outlier Filtering + 3-Way Load Split", metric: "SMART ROUTING", dot: "" },
+  t11: { kicker: "11 · REAL-WORLD PAYOFF", head: "Rerouting Around Trouble Before Braking", metric: "ETA: 18 MIN ✓", dot: "" },
+  t12: { kicker: "12 · THE 3-SIGNAL FORMULA", head: "Pings + History + Graph AI = Magic", metric: "ETERNAL STUDENT", dot: "" },
+};
+
+let M = null;
+window.initDoc = (manifest) => { M = manifest; window.seekToMs(0); };
+
+function drawGrid(t) {
+  ctx.fillStyle = "#050a14";
+  ctx.fillRect(0, 0, 1080, 1920);
+  const g = ctx.createRadialGradient(540, 880, 40, 540, 880, 760);
+  g.addColorStop(0, "rgba(14, 165, 233, 0.14)");
+  g.addColorStop(1, "rgba(5, 10, 20, 0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 1080, 1920);
+
+  ctx.strokeStyle = "rgba(56, 189, 248, 0.06)";
+  ctx.lineWidth = 1.5;
+  const off = (t * 0.02) % 60;
+  for (let x = 0; x <= 1080; x += 60) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1920); ctx.stroke();
+  }
+  for (let y = off; y <= 1920; y += 60) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1080, y); ctx.stroke();
+  }
+}
+
+function roundRect(x, y, w, h, r, fill, stroke, lw=2) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+
+function drawPhoneIcon(x, y, col="#34d399", scale=1) {
+  ctx.save();
+  ctx.translate(x, y); ctx.scale(scale, scale);
+  roundRect(-14, -24, 28, 48, 6, "#0f172a", col, 2.5);
+  ctx.fillStyle = col;
+  ctx.fillRect(-9, -16, 18, 30);
+  ctx.restore();
+}
+
+// 12 BESPOKE VISUAL SCENES — ZERO REPETITION
+function renderBeatVisual(bid, p, ms) {
+  ctx.save();
+
+  if (bid === "t01") {
+    // Empty highway ahead, sweeping radar revealing red zone 3 km ahead
+    roundRect(380, 340, 320, 1080, 28, "#0b1322", "#1e293b", 3);
+    // Dashed lane line
+    ctx.strokeStyle = "rgba(226,232,240,0.3)"; ctx.lineWidth = 5; ctx.setLineDash([28, 26]);
+    ctx.beginPath(); ctx.moveTo(540, 360); ctx.lineTo(540, 1400); ctx.stroke(); ctx.setLineDash([]);
+    // Red jam strip far ahead (top half of road)
+    const jamAlpha = 0.4 + 0.45 * Math.sin(ms * 0.008);
+    roundRect(398, 370, 284, 340, 16, `rgba(239,68,68,${jamAlpha * 0.42})`, "#ef4444", 4);
+    ctx.fillStyle = "#fca5a5"; ctx.font = "800 28px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("JAM ZONE", 540, 495);
+    ctx.font = "800 24px monospace"; ctx.fillStyle = "#fde68a";
+    ctx.fillText("3.0 KM AHEAD", 540, 540);
+    // Your car cruising on clear green lower stretch
+    const carY = 1280 - p * 380;
+    const rad = (ms % 1400) / 1400;
+    ctx.beginPath(); ctx.arc(540, carY, 24 + rad * 170, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(16,185,129,${1 - rad})`; ctx.lineWidth = 4; ctx.stroke();
+    roundRect(514, carY - 38, 52, 76, 14, "#10b981", "#ecfdf5", 3);
+    roundRect(740, carY - 40, 250, 86, 14, "rgba(15,23,42,0.92)", "#10b981", 2);
+    ctx.fillStyle = "#34d399"; ctx.font = "800 28px monospace"; ctx.fillText("YOU: 52 km/h", 865, carY + 12);
+
+  } else if (bid === "t02") {
+    // Top: Satellite crossed out; Bottom: Street mesh of smartphone pings
+    ctx.save(); ctx.globalAlpha = Math.max(0.28, 1 - p * 0.6);
+    roundRect(140, 340, 800, 270, 24, "rgba(15,23,42,0.85)", "#475569", 2);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "800 32px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("🛰️ SATELLITE CAMERAS?  NO!", 540, 445);
+    ctx.fillStyle = "#64748b"; ctx.font = "600 25px sans-serif";
+    ctx.fillText("Too slow & blocked by clouds / cost", 540, 505);
+    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(210, 415); ctx.lineTo(870, 455); ctx.stroke();
+    ctx.restore();
+
+    roundRect(90, 670, 900, 740, 28, "#091322", "#0ea5e9", 2.5);
+    ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 22;
+    for (let y of [840, 1060, 1270]) { ctx.beginPath(); ctx.moveTo(120, y); ctx.lineTo(960, y); ctx.stroke(); }
+    for (let x of [310, 540, 770]) { ctx.beginPath(); ctx.moveTo(x, 700); ctx.lineTo(x, 1380); ctx.stroke(); }
+    for (let i = 0; i < 24; i++) {
+      const px = 170 + ((i * 197) % 740) + Math.sin(ms * 0.002 + i) * 18;
+      const py = 740 + ((i * 263) % 600);
+      const pulse = (Math.sin(ms * 0.007 + i) + 1) * 0.5;
+      ctx.beginPath(); ctx.arc(px, py, 10 + pulse * 18, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(56,189,248,${0.18 + pulse * 0.25})`; ctx.fill();
+      drawPhoneIcon(px, py, "#38bdf8", 0.55);
+    }
+    ctx.fillStyle = "#38bdf8"; ctx.font = "800 28px monospace"; ctx.textAlign = "center";
+    ctx.fillText("LIVE CROWDSOURCED SMARTPHONES ✓", 540, 1365);
+
+  } else if (bid === "t03") {
+    // Privacy Shield: Phone Identity Stripped -> Anonymous Hash
+    roundRect(110, 380, 860, 260, 24, "rgba(127,29,29,0.28)", "#ef4444", 3);
+    ctx.fillStyle = "#fca5a5"; ctx.font = "700 26px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("RAW DEVICE INFO", 160, 445);
+    ctx.fillStyle = "#f8fafc"; ctx.font = "800 32px monospace";
+    ctx.fillText("Name: Rahul Sharma   ✗ STRIPPED", 160, 515);
+    ctx.fillText("Phone: +91-98xxx-xx  ✗ STRIPPED", 160, 575);
+
+    // Shield Filter Gate
+    const pulseY = 670 + 180;
+    roundRect(170, 750, 740, 150, 24, "rgba(6,78,59,0.55)", "#10b981", 4);
+    ctx.fillStyle = "#34d399"; ctx.font = "800 34px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("🔒 ANONYMIZER HASH GATE", 540, 818);
+    ctx.fillStyle = "#a7f3d0"; ctx.font = "600 24px monospace";
+    ctx.fillText("Zero Personal Identity Stored", 540, 865);
+
+    // Output token flowing down
+    const dropY = 930 + ((ms % 1200) / 1200) * 140;
+    ctx.strokeStyle = "#34d399"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(540, 900); ctx.lineTo(540, 1080); ctx.stroke();
+    ctx.beginPath(); ctx.arc(540, dropY, 16, 0, Math.PI * 2); ctx.fillStyle = "#fbbf24"; ctx.fill();
+
+    roundRect(150, 1080, 780, 250, 24, "rgba(15,23,42,0.92)", "#38bdf8", 3);
+    ctx.fillStyle = "#38bdf8"; ctx.font = "800 30px monospace";
+    ctx.fillText("SERVER ONLY SEES: ID #9F3A", 540, 1175);
+    ctx.fillStyle = "#cbd5e1"; ctx.font = "700 28px monospace";
+    ctx.fillText("[ 28.613°N, 77.209°E · 42 km/h ]", 540, 1250);
+
+  } else if (bid === "t04") {
+    // Radar Ping Anatomy every 5s: 3 crisp numbers
+    const cx = 540, cy = 690;
+    for (let k = 0; k < 3; k++) {
+      const rp = ((ms / 1800) + k * 0.33) % 1;
+      ctx.beginPath(); ctx.arc(cx, cy, 40 + rp * 290, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(56,189,248,${(1 - rp) * 0.85})`; ctx.lineWidth = 4; ctx.stroke();
+    }
+    drawPhoneIcon(cx, cy, "#fbbf24", 2.0);
+    const cards = [
+      ["1. GPS COORDS", "28.6139° N, 77.2090° E", "#38bdf8"],
+      ["2. COMPASS HEADING", "242° NORTH-WEST", "#34d399"],
+      ["3. SPEED VECTOR", "11.4 km/h (EVERY 5.0s)", "#fbbf24"],
+    ];
+    cards.forEach((c, idx) => {
+      const y = 1010 + idx * 130;
+      const slide = Math.min(1, p * 3.5 - idx * 0.25);
+      ctx.save(); ctx.globalAlpha = Math.max(0, slide);
+      roundRect(110, y, 860, 105, 18, "rgba(11,18,34,0.92)", c[2], 2.5);
+      ctx.fillStyle = c[2]; ctx.font = "800 22px monospace"; ctx.textAlign = "left"; ctx.fillText(c[0], 145, y + 40);
+      ctx.fillStyle = "#f8fafc"; ctx.font = "800 32px monospace"; ctx.fillText(c[1], 145, y + 82);
+      ctx.restore();
+    });
+
+  } else if (bid === "t05") {
+    // 25 cars squeezing from 50 km/h green to 12 km/h red bottleneck + speedometer
+    roundRect(110, 350, 860, 610, 26, "#091322", "#334155", 3);
+    roundRect(140, 560, 800, 180, 18, "#0f172a", "#1e293b", 2);
+    // Gradient congestion heat on road
+    const gRoad = ctx.createLinearGradient(140, 0, 940, 0);
+    gRoad.addColorStop(0, "rgba(16,185,129,0.22)");
+    gRoad.addColorStop(0.45, "rgba(245,158,11,0.35)");
+    gRoad.addColorStop(1, "rgba(239,68,68,0.55)");
+    ctx.fillStyle = gRoad; ctx.fillRect(142, 562, 796, 176);
+
+    for (let i = 0; i < 20; i++) {
+      const col = i > 7 ? "#ef4444" : (i > 4 ? "#f59e0b" : "#10b981");
+      const x = i < 7 ? (165 + i * 44) : (485 + (i - 7) * 30);
+      const y = 595 + (i % 2) * 72;
+      roundRect(x, y, 22, 34, 6, col, "#fff", 1.5);
+    }
+    ctx.fillStyle = "#34d399"; ctx.font = "800 26px monospace"; ctx.textAlign = "left"; ctx.fillText("50 km/h", 160, 520);
+    ctx.fillStyle = "#ef4444"; ctx.textAlign = "right"; ctx.fillText("12 km/h JAM!", 920, 520);
+
+    // Live Speedometer Arc below
+    const spd = Math.round(50 - Math.min(1, p * 1.3) * 38);
+    const colSpd = spd < 20 ? "#ef4444" : "#fbbf24";
+    roundRect(190, 1000, 700, 355, 26, "rgba(11,18,34,0.92)", colSpd, 3);
+    ctx.beginPath(); ctx.arc(540, 1245, 168, Math.PI, Math.PI * 2);
+    ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 20; ctx.stroke();
+    ctx.beginPath(); ctx.arc(540, 1245, 168, Math.PI, Math.PI + (spd / 60) * Math.PI);
+    ctx.strokeStyle = colSpd; ctx.lineWidth = 20; ctx.stroke();
+    ctx.fillStyle = "#f8fafc"; ctx.font = "900 54px monospace"; ctx.textAlign = "center"; ctx.fillText(`${spd} km/h`, 540, 1225);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "700 23px sans-serif"; ctx.fillText("CROWD THRESHOLD HIT → LINE TURNS RED", 540, 1305);
+
+  } else if (bid === "t06") {
+    // Historical Tuesday 6:15 PM Baseline vs Live Curve
+    roundRect(80, 380, 920, 880, 28, "rgba(8,14,26,0.95)", "#38bdf8", 2.5);
+    ctx.fillStyle = "#38bdf8"; ctx.font = "800 28px monospace"; ctx.textAlign = "left";
+    ctx.fillText("SPEED TIMELINE (TUESDAYS @ 6:15 PM)", 130, 445);
+
+    const gx0 = 150, gy0 = 1080, gw = 780, gh = 480;
+    ctx.strokeStyle = "#334155"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(gx0, gy0 - gh); ctx.lineTo(gx0, gy0); ctx.lineTo(gx0 + gw, gy0); ctx.stroke();
+
+    // Dashed Historical Blue Baseline
+    ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 6; ctx.setLineDash([14, 10]);
+    ctx.beginPath();
+    const histPts = [0.75, 0.72, 0.65, 0.48, 0.32, 0.25, 0.28, 0.42];
+    histPts.forEach((v, i) => {
+      const px = gx0 + (i / 7) * gw, py = gy0 - v * gh;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // Animated Live Red Anomaly Curve
+    const maxSeg = Math.max(1, p * 7);
+    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 9;
+    ctx.beginPath();
+    const livePts = [0.76, 0.70, 0.56, 0.30, 0.16, 0.14, 0.16, 0.22];
+    livePts.forEach((v, i) => {
+      if (i <= Math.ceil(maxSeg)) {
+        const px = gx0 + (i / 7) * gw, py = gy0 - v * gh;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+    });
+    ctx.stroke();
+    roundRect(140, 1130, 380, 82, 14, "rgba(56,189,248,0.16)", "#38bdf8", 2);
+    ctx.fillStyle = "#7dd3fc"; ctx.font = "700 23px monospace"; ctx.fillText("--- 52 Tuesdays Baseline", 165, 1180);
+    roundRect(560, 1130, 380, 82, 14, "rgba(239,68,68,0.18)", "#ef4444", 2);
+    ctx.fillStyle = "#fca5a5"; ctx.fillText("━━ Today's Early Drop", 585, 1180);
+
+  } else if (bid === "t07") {
+    // Supersegments & Graph Neural Network Propagation
+    const nodes = [
+      { id: "J1", x: 540, y: 450, jam: true },
+      { id: "J2", x: 300, y: 690, jam: p > 0.25 },
+      { id: "J3", x: 780, y: 690, jam: p > 0.35 },
+      { id: "J4", x: 540, y: 920, jam: p > 0.55 },
+      { id: "J5", x: 260, y: 1170, jam: false },
+      { id: "J6", x: 820, y: 1170, jam: p > 0.75 },
+    ];
+    const edges = [[0,1],[0,2],[1,3],[2,3],[1,4],[3,4],[3,5],[2,5]];
+    edges.forEach(([a, b]) => {
+      const hot = nodes[a].jam && nodes[b].jam;
+      ctx.strokeStyle = hot ? "#ef4444" : "rgba(56,189,248,0.4)";
+      ctx.lineWidth = hot ? 10 : 5;
+      ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
+    });
+    nodes.forEach((n, i) => {
+      if (n.jam) {
+        const rp = (ms / 900 + i * 0.2) % 1;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 44 + rp * 55, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(239,68,68,${1 - rp})`; ctx.lineWidth = 4; ctx.stroke();
+      }
+      ctx.beginPath(); ctx.arc(n.x, n.y, 46, 0, Math.PI * 2);
+      ctx.fillStyle = n.jam ? "#7f1d1d" : "#0f172a"; ctx.fill();
+      ctx.strokeStyle = n.jam ? "#ef4444" : "#38bdf8"; ctx.lineWidth = 5; ctx.stroke();
+      ctx.fillStyle = "#fff"; ctx.font = "800 30px monospace"; ctx.textAlign = "center";
+      ctx.fillText(n.id, n.x, n.y + 10);
+    });
+    roundRect(140, 1275, 800, 90, 18, "rgba(15,23,42,0.92)", "#fbbf24", 2.5);
+    ctx.fillStyle = "#fde68a"; ctx.font = "800 26px monospace";
+    ctx.fillText("GNN PROPAGATION: +10 MIN FUTURE IMPACT", 540, 1330);
+
+  } else if (bid === "t08") {
+    // 2020 Berlin Artist pulling RED HANDCART with 99 green glowing phones on empty street
+    roundRect(160, 360, 760, 990, 28, "#08101c", "#334155", 3);
+    // Completely empty gray asphalt bridge road
+    ctx.fillStyle = "#111827"; ctx.fillRect(340, 380, 400, 950);
+    ctx.strokeStyle = "rgba(255,255,255,0.22)"; ctx.setLineDash([26, 26]); ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(540, 390); ctx.lineTo(540, 1320); ctx.stroke(); ctx.setLineDash([]);
+
+    const cartY = 1120 - p * 420;
+    // Red handcart!
+    roundRect(455, cartY, 170, 210, 16, "#991b1b", "#ef4444", 5);
+    // Tiny walking figure ahead of cart handle
+    ctx.strokeStyle = "#f8fafc"; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(540, cartY); ctx.lineTo(540, cartY - 38); ctx.stroke();
+    ctx.beginPath(); ctx.arc(540, cartY - 56, 18, 0, Math.PI * 2); ctx.fillStyle = "#f8fafc"; ctx.fill();
+    // 99 blinking green Android phone grid packed inside cart!
+    for (let r = 0; r < 6; r++) {
+      for (let c = 0; c < 4; c++) {
+        const blink = ((r + c + Math.floor(ms / 220)) % 3 === 0) ? "#34d399" : "#10b981";
+        ctx.fillStyle = blink;
+        ctx.fillRect(475 + c * 34, cartY + 20 + r * 28, 22, 18);
+      }
+    }
+    roundRect(220, 410, 640, 100, 16, "rgba(15,23,42,0.92)", "#fbbf24", 2.5);
+    ctx.fillStyle = "#fbbf24"; ctx.font = "800 28px monospace"; ctx.textAlign = "center";
+    ctx.fillText("BERLIN 2020 · 99 PHONES @ 3 KM/H", 540, 470);
+
+  } else if (bid === "t09") {
+    // Empty street overlaid with solid crimson Google Maps Jam Card!
+    ctx.fillStyle = "#111827"; ctx.fillRect(340, 360, 400, 1000);
+    // Turn entire empty road blazing crimson red!
+    const pulse = 0.65 + 0.25 * Math.sin(ms * 0.01);
+    roundRect(355, 370, 370, 980, 16, `rgba(239,68,68,${pulse * 0.55})`, "#ef4444", 6);
+    ctx.fillStyle = "#fca5a5"; ctx.font = "800 32px monospace"; ctx.textAlign = "center";
+    ctx.fillText("ZERO REAL CARS", 540, 610);
+    roundRect(140, 740, 800, 260, 26, "rgba(127,29,29,0.94)", "#ef4444", 4);
+    ctx.fillStyle = "#ffffff"; ctx.font = "900 46px sans-serif"; ctx.fillText("SEVERE TRAFFIC JAM", 540, 835);
+    ctx.fillStyle = "#fde68a"; ctx.font = "800 34px monospace"; ctx.fillText("+38 MIN DELAY · 99 PHONES FOOLED IT", 540, 915);
+
+  } else if (bid === "t10") {
+    // Top: Outlier Radar rejecting parked delivery scooters; Bottom: 3-way Load Balancing Split
+    roundRect(110, 350, 860, 380, 24, "rgba(11,18,34,0.92)", "#38bdf8", 2.5);
+    ctx.fillStyle = "#38bdf8"; ctx.font = "800 26px monospace"; ctx.textAlign = "left";
+    ctx.fillText("FILTER 1: IGNORE PARKED OUTLIERS", 150, 410);
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath(); ctx.arc(210 + i * 70, 525, 16, 0, Math.PI * 2); ctx.fillStyle = "#64748b"; ctx.fill();
+    }
+    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 5;
+    ctx.strokeRect(175, 480, 420, 90);
+    ctx.fillStyle = "#fca5a5"; ctx.font = "800 24px monospace"; ctx.fillText("0 km/h Parked Cluster ✗", 625, 535);
+    ctx.fillStyle = "#34d399"; ctx.fillText("Moving Windshields ✓", 150, 665);
+
+    roundRect(110, 780, 860, 580, 24, "rgba(11,18,34,0.92)", "#10b981", 2.5);
+    ctx.fillStyle = "#34d399"; ctx.font = "800 26px monospace"; ctx.fillText("FILTER 2: DYNAMIC ROUTE LOAD BALANCING", 150, 845);
+    // 1 trunk splitting cleanly into 3 balanced routes well below header
+    ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 10;
+    const forks = [[960, "ROUTE A · 40%"], [1110, "ROUTE B · 35%"], [1260, "ROUTE C · 25%"]];
+    forks.forEach(([fy, lbl], idx) => {
+      ctx.beginPath(); ctx.moveTo(190, 1110); ctx.quadraticCurveTo(380, 1110, 520, fy); ctx.lineTo(890, fy); ctx.stroke();
+      const bx = 200 + ((ms * 0.25 + idx * 240) % 660);
+      const by = bx < 520 ? 1110 + ((bx - 200) / 320) * (fy - 1110) : fy;
+      ctx.beginPath(); ctx.arc(bx, by, 13, 0, Math.PI * 2); ctx.fillStyle = "#fbbf24"; ctx.fill();
+      ctx.fillStyle = "#e2e8f0"; ctx.font = "800 24px monospace"; ctx.fillText(lbl, 560, fy - 24);
+    });
+
+  } else if (bid === "t11") {
+    // Smart Bypass ETA Lock cleanly separated below banner
+    roundRect(120, 380, 840, 880, 28, "#081221", "#10b981", 3);
+    roundRect(220, 420, 640, 105, 20, "rgba(6,78,59,0.92)", "#10b981", 3);
+    ctx.fillStyle = "#6ee7b7"; ctx.font = "900 38px monospace"; ctx.textAlign = "center";
+    ctx.fillText("ETA LOCKED: 18 MIN ✓", 540, 486);
+
+    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 22;
+    ctx.beginPath(); ctx.moveTo(540, 1185); ctx.lineTo(540, 565); ctx.stroke();
+    ctx.strokeStyle = "#10b981"; ctx.lineWidth = 22;
+    ctx.beginPath(); ctx.moveTo(540, 1185); ctx.lineTo(540, 960); ctx.quadraticCurveTo(210, 820, 540, 565); ctx.stroke();
+    const ap = (ms % 2200) / 2200;
+    const ax = ap < 0.25 ? 540 : (540 - Math.sin(((ap - 0.25) / 0.75) * Math.PI) * 195);
+    const ay = 1185 - ap * 620;
+    ctx.beginPath(); ctx.arc(ax, ay, 22, 0, Math.PI * 2); ctx.fillStyle = "#fde68a"; ctx.fill();
+
+  } else if (bid === "t12") {
+    // 3 Unified Signal Pillars Finale
+    const pillars = [
+      ["01 · LIVE ANONYMOUS PINGS", "Location · Heading · Speed every 5s", "#38bdf8"],
+      ["02 · HISTORICAL BASELINE", "52-Week Tuesday/Rush-Hour Comparison", "#fbbf24"],
+      ["03 · GRAPH NEURAL AI", "Upstream Jam Prediction & Load Split", "#10b981"],
+    ];
+    pillars.forEach((pl, i) => {
+      const y = 410 + i * 245;
+      const sc = Math.min(1, Math.max(0.85, p * 2.5 - i * 0.2));
+      ctx.save(); ctx.translate(540, y + 95); ctx.scale(sc, sc); ctx.translate(-540, -(y + 95));
+      roundRect(110, y, 860, 195, 24, "rgba(11,18,34,0.94)", pl[2], 3.5);
+      ctx.fillStyle = pl[2]; ctx.font = "800 30px monospace"; ctx.textAlign = "left"; ctx.fillText(pl[0], 155, y + 72);
+      ctx.fillStyle = "#f1f5f9"; ctx.font = "700 28px sans-serif"; ctx.fillText(pl[1], 155, y + 132);
+      ctx.restore();
+    });
+    roundRect(240, 1190, 600, 110, 999, "rgba(16,185,129,0.16)", "#10b981", 2.5);
+    ctx.fillStyle = "#34d399"; ctx.font = "800 32px monospace"; ctx.textAlign = "center";
+    ctx.fillText("FOLLOW ETERNAL STUDENT ✓", 540, 1256);
+  }
+
+  ctx.restore();
+}
+
+function formatSub(txt) {
+  return txt.replace(/(Google Maps|GPS|5 seconds|50 → 12 km\/h|Tuesday|99 Phones|Berlin 2020|Graph AI|ETA|Eternal Student)/g, '<span class="hl">$1</span>');
+}
+
+window.seekToMs = (ms) => {
+  drawGrid(ms);
+  if (!M) return;
+  const pct = Math.max(0, Math.min(100, (ms / M.total_ms) * 100));
+  document.getElementById("pbar").style.width = pct.toFixed(2) + "%";
+
+  let cur = M.beats[0];
+  for (const b of M.beats) {
+    if (ms >= b.start_ms - 120) cur = b;
+  }
+  const p = Math.max(0, Math.min(1, (ms - cur.start_ms) / Math.max(1, cur.end_ms - cur.start_ms)));
+  const meta = BEAT_META[cur.id] || BEAT_META.t01;
+
+  document.getElementById("kicker").textContent = meta.kicker;
+  document.getElementById("head").textContent = meta.head;
+  document.getElementById("topMetric").textContent = meta.metric;
+  document.getElementById("topDot").className = "dot " + meta.dot;
+  document.getElementById("subBox").innerHTML = formatSub(cur.cap || "");
+
+  const kt = document.getElementById("kavyaTag");
+  if (cur.spk === "kavya" && ms <= cur.end_ms + 200) {
+    kt.textContent = cur.id === "t11" ? "SMART TAKEAWAY · KAVYA" : "VIEWER DOUBT · KAVYA";
+    kt.classList.add("show");
+  } else {
+    kt.classList.remove("show");
+  }
+
+  renderBeatVisual(cur.id, p, ms);
+};
+</script>
+</body>
+</html>

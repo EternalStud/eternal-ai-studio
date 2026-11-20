@@ -113,7 +113,13 @@
   - 5 Blender 5.3 3D hero clips (`w1_oom`, `w1_ok`, `w2_dc`, `w3_cpugpu`, `w4_vault`) with crisp Playwright display textures (`scripts/generate_screen_textures.py`) and visually inspected previews (`w1_desk..w4_vault`).
   - 4 interactive `1920×1080` animated UI scenes incorporating authentic verified Colab T4 benchmark numbers (`4096×4096 FP32 ×15`: **CPU `17.94s` vs Tesla T4 `0.522s`, `34.4× faster`**).
   - Verified final output frames (`v_10..v_295`) and audio slices (`a_24_42.mp3`, `a_end.mp3`).
+- **Human Feedback Verdict (Critical Mandate):**
+  - **Voice Approved:** *"Voice is awesome."* Dual-voice **`Notebook LLM hindi` (Chatterbox) + `Veena kavya`** cleanly passed human review.
+  - **Visuals Critique:** Repeating 5 short 3D boomerang loops + 4 UI templates across 28 beats felt repetitive and disconnected from the explainer.
+  - **New Studio Rule Across All `.md` Files:** **Analyse the topic FIRST** to decide which skills/visuals are needed (never force Blender 3D onto topics better served by bespoke Canvas/SVG motion graphics or zoomed screen recordings), and enforce **1 beat = 1 bespoke animated visual**.
 
 ## Next Steps
-1. **User Reviews `google_colab_masterclass_16x9.mp4`:** Watch [output/google_colab_masterclass_16x9.mp4](output/google_colab_masterclass_16x9.mp4) and evaluate pacing, dual-voice naturalness (`Notebook LLM hindi` + `Veena kavya`), 16:9 visuals, and YouTube long-form monetization fit.
-2. **Next Content Strategy:** Scale reusable `1920×1080` explainer + live-benchmarked tutorial format (and optional `60s` vertical Shorts cutdowns) with real audio/Veena+Chatterbox dialogue.
+1. **Flagship 2-Minute `1080×1920` Explainer COMPLETE ([output/gmaps_traffic_2min_1080x1920.mp4](output/gmaps_traffic_2min_1080x1920.mp4)):**
+   - **Topic & Niche (*Invisible Systems Behind Everyday Tech*):** *How Google Maps Predicts Traffic Jams Before Anyone Brakes (+ Berlin 99-Phone Hack)* (`24.0 MB`, `1080×1920 @ 30fps`, `135.25s`, `-14 LUFS`).
+   - **Topic-First Decision:** Skipped Blender 3D intentionally because geospatial traffic telemetry, Graph AI, and the 2020 Berlin 99-phone red-handcart experiment are clearest via **12 bespoke per-beat animated HTML5 Canvas tactical visualizations** (`scenes/gmaps_2min_1080x1920.html`, `4,058` unique frames—zero recycled loops).
+   - **Verified Voices:** Dual-voice **`Notebook LLM hindi` (`Chatterbox`)** + **`Veena kavya`** synthesized on Colab T4, trimmed via RMS trailing-silence scanning, visually & audibly inspected across frames (`vf_4..vf_120`, `vf_46_fixed.png`) and audio (`va_start.mp3`, `va_end.mp3`).
