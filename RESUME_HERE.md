@@ -119,7 +119,10 @@
   - **New Studio Rule Across All `.md` Files:** **Analyse the topic FIRST** to decide which skills/visuals are needed (never force Blender 3D onto topics better served by bespoke Canvas/SVG motion graphics or zoomed screen recordings), and enforce **1 beat = 1 bespoke animated visual**.
 
 ## Next Steps
-1. **Flagship 2-Minute `1080×1920` Explainer COMPLETE ([output/gmaps_traffic_2min_1080x1920.mp4](output/gmaps_traffic_2min_1080x1920.mp4)):**
-   - **Topic & Niche (*Invisible Systems Behind Everyday Tech*):** *How Google Maps Predicts Traffic Jams Before Anyone Brakes (+ Berlin 99-Phone Hack)* (`24.0 MB`, `1080×1920 @ 30fps`, `135.25s`, `-14 LUFS`).
-   - **Topic-First Decision:** Skipped Blender 3D intentionally because geospatial traffic telemetry, Graph AI, and the 2020 Berlin 99-phone red-handcart experiment are clearest via **12 bespoke per-beat animated HTML5 Canvas tactical visualizations** (`scenes/gmaps_2min_1080x1920.html`, `4,058` unique frames—zero recycled loops).
-   - **Verified Voices:** Dual-voice **`Notebook LLM hindi` (`Chatterbox`)** + **`Veena kavya`** synthesized on Colab T4, trimmed via RMS trailing-silence scanning, visually & audibly inspected across frames (`vf_4..vf_120`, `vf_46_fixed.png`) and audio (`va_start.mp3`, `va_end.mp3`).
+1. **Google Maps 2-Minute Explainer (`v1` Shipped & Posted -> `70–100` Early Views; `v2` Upgraded from `7.4/10` Critique):**
+   - **Published Baseline (`v1`):** `output/gmaps_traffic_2min_1080x1920.mp4` (`24.0 MB`, `1080×1920 @ 30fps`, `135.25s`, `-14 LUFS`).
+   - **Critique Findings Permanently Encoded into `docs/QUALITY_STANDARDS.md` & `scenes/gmaps_2min_1080x1920.html` (`v2`):**
+     - Replaced static slide-deck scenes (`t03`, `t08`, `t09`, `t12`) with continuous packet anonymization flow, split-screen Berlin cart + live shifting `Green → Amber → Crimson` phone map UI, and staggered 3-pillar card reveal + interactive comment prompt.
+     - Fixed count/telemetry sync (`25` exact phone icons in `t05`, dynamic top-right speed pill + threshold alert tracking gauge needle `50 → 12 km/h`), added explicit `5:30 PM – 7:00 PM` & `0 – 60 km/h` axes ticks (`t06`), replaced abstract `J1–J6` with directional arrows + `Choke Point` node labels (`t07`), added frosted pill backing (`t02`), and added full-bleed highway POV (`t01`) to break layout monotony.
+2. **YouTube Channel Bridge (`automation/youtube_bridge.py`):**
+   - Supports both immediate public channel audit (`yt-dlp`, once channel URL/handle is provided) and sanctioned Google OAuth 2.0 (`YouTube Data API v3` + `YouTube Analytics API`) using `.gitignored` `credentials/youtube_client_secret.json` for retention analytics + gated upload automation.

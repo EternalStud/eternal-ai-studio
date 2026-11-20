@@ -18,8 +18,8 @@
   }
   .pill {
     display: inline-flex; align-items: center; gap: 10px;
-    background: rgba(7, 13, 25, 0.84);
-    border: 1px solid rgba(56, 189, 248, 0.35);
+    background: rgba(7, 13, 25, 0.88);
+    border: 1px solid rgba(56, 189, 248, 0.38);
     padding: 11px 22px; border-radius: 999px;
     font-size: 21px; font-weight: 700; letter-spacing: 0.05em;
     box-shadow: 0 10px 28px rgba(0,0,0,0.45);
@@ -39,10 +39,10 @@
   }
   .scene-head {
     font-size: 46px; font-weight: 800; line-height: 1.15;
-    text-shadow: 0 6px 24px rgba(0,0,0,0.75);
+    text-shadow: 0 6px 24px rgba(0,0,0,0.85);
   }
 
-  /* Subtitles anchored in Zone D (y=1490..1710), keeping Zone E (1730..1920) 100% clear for Shorts/Reels UI */
+  /* Subtitles anchored cleanly in Zone D (y=1490..1710), keeping Zone E clear for Shorts/Reels UI */
   .sub-wrap {
     position: absolute; bottom: 215px; left: 52px; right: 52px;
     display: flex; flex-direction: column; align-items: center; gap: 12px;
@@ -50,18 +50,18 @@
   }
   .kavya-tag {
     display: none;
-    background: rgba(245, 158, 11, 0.22);
-    border: 1px solid rgba(251, 191, 36, 0.78);
+    background: rgba(245, 158, 11, 0.24);
+    border: 1px solid rgba(251, 191, 36, 0.82);
     color: #fde68a; padding: 6px 18px; border-radius: 999px;
     font-size: 20px; font-weight: 800; letter-spacing: 0.08em;
   }
   .kavya-tag.show { display: inline-block; }
   .sub-box {
-    background: rgba(6, 11, 22, 0.88);
-    border: 1px solid rgba(148, 163, 184, 0.30);
+    background: rgba(6, 11, 22, 0.90);
+    border: 1px solid rgba(148, 163, 184, 0.34);
     border-radius: 20px; padding: 18px 28px;
     font-size: 35px; font-weight: 700; line-height: 1.38; text-align: center;
-    box-shadow: 0 14px 36px rgba(0,0,0,0.62);
+    box-shadow: 0 14px 36px rgba(0,0,0,0.65);
   }
   .hl { color: #fbbf24; font-weight: 800; }
   .pbar-bg { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: rgba(255,255,255,0.08); }
@@ -92,14 +92,14 @@ const cv = document.getElementById("cv");
 const ctx = cv.getContext("2d");
 
 const BEAT_META = {
-  t01: { kicker: "01 · THE TRAFFIC MYSTERY", head: "Road Empty Ahead — Yet Red Jam?", metric: "3.0 KM AHEAD", dot: "red" },
+  t01: { kicker: "01 · THE TRAFFIC MYSTERY", head: "Road Empty Ahead — Yet Red Jam?", metric: "DIST: 3.0 KM", dot: "red" },
   t02: { kicker: "02 · MYTH BUSTED", head: "Not Satellites. Crowdsourced Phones.", metric: "GPS CROWD MESH", dot: "" },
   t03: { kicker: "03 · PRIVACY QUESTION", head: "Does Google See Your Name & Number?", metric: "PRIVACY CHECK", dot: "amber" },
   t04: { kicker: "04 · ANONYMOUS PING", head: "Only 3 Numbers Sent Every 5 Seconds", metric: "PING CYCLE: 5.0s", dot: "" },
-  t05: { kicker: "05 · CONGESTION TRIGGER", head: "25 Phones Drop 50 → 12 km/h = RED", metric: "AVG: 12 KM/H", dot: "red" },
+  t05: { kicker: "05 · CONGESTION TRIGGER", head: "25 Phones Drop 50 → 12 km/h = RED", metric: "LIVE: 50 KM/H", dot: "" },
   t06: { kicker: "06 · TIME TRAVEL DATA", head: "Live Speed vs. 52 Tuesdays Baseline", metric: "HISTORICAL OVERLAY", dot: "amber" },
   t07: { kicker: "07 · GRAPH NEURAL AI", head: "Predicting Upstream Jam Ripples", metric: "GRAPH AI ENGINE", dot: "red" },
-  t08: { kicker: "08 · BERLIN 2020 EXPERIMENT", head: "99 Unlocked Phones in a Red Handcart", metric: "SPEED: 3.0 KM/H", dot: "amber" },
+  t08: { kicker: "08 · BERLIN 2020 EXPERIMENT", head: "99 Unlocked Phones in a Red Handcart", metric: "CART: 3.0 KM/H", dot: "amber" },
   t09: { kicker: "09 · THE GHOST TRAFFIC JAM", head: "Zero Cars on Road — Maps Turns Crimson!", metric: "GHOST JAM +38m", dot: "red" },
   t10: { kicker: "10 · MODERN AI DEFENSES", head: "Outlier Filtering + 3-Way Load Split", metric: "SMART ROUTING", dot: "" },
   t11: { kicker: "11 · REAL-WORLD PAYOFF", head: "Rerouting Around Trouble Before Braking", metric: "ETA: 18 MIN ✓", dot: "" },
@@ -118,7 +118,7 @@ function drawGrid(t) {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 1080, 1920);
 
-  ctx.strokeStyle = "rgba(56, 189, 248, 0.06)";
+  ctx.strokeStyle = "rgba(56, 189, 248, 0.055)";
   ctx.lineWidth = 1.5;
   const off = (t * 0.02) % 60;
   for (let x = 0; x <= 1080; x += 60) {
@@ -145,91 +145,138 @@ function drawPhoneIcon(x, y, col="#34d399", scale=1) {
   ctx.restore();
 }
 
-// 12 BESPOKE VISUAL SCENES — ZERO REPETITION
+function drawArrow(x1, y1, x2, y2, col, lw=4, head=14) {
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - head * Math.cos(ang - 0.45), y2 - head * Math.sin(ang - 0.45));
+  ctx.lineTo(x2 - head * Math.cos(ang + 0.45), y2 - head * Math.sin(ang + 0.45));
+  ctx.closePath(); ctx.fill();
+}
+
+// 12 BESPOKE ANIMATED VISUAL SCENES — ZERO REPETITION, ZERO STATIC SLIDES
 function renderBeatVisual(bid, p, ms) {
   ctx.save();
 
   if (bid === "t01") {
-    // Empty highway ahead, sweeping radar revealing red zone 3 km ahead
-    roundRect(380, 340, 320, 1080, 28, "#0b1322", "#1e293b", 3);
-    // Dashed lane line
-    ctx.strokeStyle = "rgba(226,232,240,0.3)"; ctx.lineWidth = 5; ctx.setLineDash([28, 26]);
-    ctx.beginPath(); ctx.moveTo(540, 360); ctx.lineTo(540, 1400); ctx.stroke(); ctx.setLineDash([]);
-    // Red jam strip far ahead (top half of road)
-    const jamAlpha = 0.4 + 0.45 * Math.sin(ms * 0.008);
-    roundRect(398, 370, 284, 340, 16, `rgba(239,68,68,${jamAlpha * 0.42})`, "#ef4444", 4);
-    ctx.fillStyle = "#fca5a5"; ctx.font = "800 28px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("JAM ZONE", 540, 495);
-    ctx.font = "800 24px monospace"; ctx.fillStyle = "#fde68a";
-    ctx.fillText("3.0 KM AHEAD", 540, 540);
-    // Your car cruising on clear green lower stretch
-    const carY = 1280 - p * 380;
-    const rad = (ms % 1400) / 1400;
-    ctx.beginPath(); ctx.arc(540, carY, 24 + rad * 170, 0, Math.PI * 2);
+    // Full-bleed Map POV (breaks centered-card template!)
+    // Curved highway perspective stretching across entire vertical map viewport
+    ctx.fillStyle = "#081221";
+    ctx.beginPath();
+    ctx.moveTo(220, 1920); ctx.quadraticCurveTo(340, 1080, 445, 290);
+    ctx.lineTo(635, 290); ctx.quadraticCurveTo(740, 1080, 860, 1920);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 4; ctx.stroke();
+
+    // Animated rushing road center dashes
+    ctx.strokeStyle = "rgba(226,232,240,0.34)"; ctx.lineWidth = 6; ctx.setLineDash([42, 34]);
+    ctx.lineDashOffset = -(ms * 0.14);
+    ctx.beginPath(); ctx.moveTo(540, 1920); ctx.lineTo(540, 310); ctx.stroke(); ctx.setLineDash([]);
+
+    // Distant horizon crimson choke zone pulsing
+    const jamAlpha = 0.45 + 0.4 * Math.sin(ms * 0.008);
+    ctx.fillStyle = `rgba(239,68,68,${jamAlpha * 0.48})`;
+    ctx.beginPath();
+    ctx.moveTo(410, 620); ctx.lineTo(445, 300); ctx.lineTo(635, 300); ctx.lineTo(670, 620);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 4; ctx.stroke();
+
+    roundRect(350, 360, 380, 96, 18, "rgba(127,29,29,0.92)", "#ef4444", 3);
+    const remKm = (3.0 - p * 0.9).toFixed(1);
+    document.getElementById("topMetric").textContent = `JAM IN ${remKm} KM`;
+    ctx.fillStyle = "#fecaca"; ctx.font = "800 26px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(`CRIMSON JAM · ${remKm} KM AHEAD`, 540, 418);
+
+    // Sweeping lidar beam up the empty lane ahead of your vehicle
+    const sweepY = 1220 - ((ms % 1600) / 1600) * 620;
+    const gs = ctx.createLinearGradient(0, sweepY + 90, 0, sweepY);
+    gs.addColorStop(0, "rgba(16,185,129,0)");
+    gs.addColorStop(1, "rgba(56,189,248,0.42)");
+    ctx.fillStyle = gs;
+    ctx.fillRect(390, sweepY, 300, 90);
+
+    // Moving green hero car at bottom POV
+    const carY = 1330 - Math.sin(p * Math.PI) * 55;
+    const rad = (ms % 1300) / 1300;
+    ctx.beginPath(); ctx.arc(540, carY, 28 + rad * 185, 0, Math.PI * 2);
     ctx.strokeStyle = `rgba(16,185,129,${1 - rad})`; ctx.lineWidth = 4; ctx.stroke();
-    roundRect(514, carY - 38, 52, 76, 14, "#10b981", "#ecfdf5", 3);
-    roundRect(740, carY - 40, 250, 86, 14, "rgba(15,23,42,0.92)", "#10b981", 2);
-    ctx.fillStyle = "#34d399"; ctx.font = "800 28px monospace"; ctx.fillText("YOU: 52 km/h", 865, carY + 12);
+    roundRect(508, carY - 46, 64, 92, 16, "#10b981", "#ecfdf5", 3.5);
+    roundRect(710, carY - 44, 285, 88, 16, "rgba(7,13,25,0.92)", "#10b981", 2.5);
+    ctx.fillStyle = "#34d399"; ctx.font = "800 28px monospace"; ctx.fillText("YOU: 52 km/h", 852, carY + 10);
 
   } else if (bid === "t02") {
-    // Top: Satellite crossed out; Bottom: Street mesh of smartphone pings
-    ctx.save(); ctx.globalAlpha = Math.max(0.28, 1 - p * 0.6);
-    roundRect(140, 340, 800, 270, 24, "rgba(15,23,42,0.85)", "#475569", 2);
-    ctx.fillStyle = "#94a3b8"; ctx.font = "800 32px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("🛰️ SATELLITE CAMERAS?  NO!", 540, 445);
+    // Myth card with clean corner stamp (not awkward diagonal cut through text!)
+    roundRect(120, 330, 840, 250, 24, "rgba(15,23,42,0.88)", "#475569", 2.5);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "800 32px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("🛰️  SATELLITE / SPEED CAMERAS", 170, 425);
     ctx.fillStyle = "#64748b"; ctx.font = "600 25px sans-serif";
-    ctx.fillText("Too slow & blocked by clouds / cost", 540, 505);
-    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 8;
-    ctx.beginPath(); ctx.moveTo(210, 415); ctx.lineTo(870, 455); ctx.stroke();
-    ctx.restore();
+    ctx.fillText("Too expensive, slow & blocked by clouds", 170, 482);
+    // Clean red rejected stamp badge in corner
+    roundRect(755, 365, 175, 58, 12, "rgba(127,29,29,0.92)", "#ef4444", 3);
+    ctx.fillStyle = "#fecaca"; ctx.font = "900 26px monospace"; ctx.textAlign = "center";
+    ctx.fillText("MYTH ✗", 842, 403);
 
-    roundRect(90, 670, 900, 740, 28, "#091322", "#0ea5e9", 2.5);
+    // Street crowd mesh with animated moving phones + blurred pill behind title
+    roundRect(90, 640, 900, 770, 28, "#091322", "#0ea5e9", 2.5);
     ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 22;
-    for (let y of [840, 1060, 1270]) { ctx.beginPath(); ctx.moveTo(120, y); ctx.lineTo(960, y); ctx.stroke(); }
-    for (let x of [310, 540, 770]) { ctx.beginPath(); ctx.moveTo(x, 700); ctx.lineTo(x, 1380); ctx.stroke(); }
+    for (let y of [800, 1020, 1230]) { ctx.beginPath(); ctx.moveTo(120, y); ctx.lineTo(960, y); ctx.stroke(); }
+    for (let x of [310, 540, 770]) { ctx.beginPath(); ctx.moveTo(x, 670); ctx.lineTo(x, 1360); ctx.stroke(); }
     for (let i = 0; i < 24; i++) {
-      const px = 170 + ((i * 197) % 740) + Math.sin(ms * 0.002 + i) * 18;
-      const py = 740 + ((i * 263) % 600);
-      const pulse = (Math.sin(ms * 0.007 + i) + 1) * 0.5;
-      ctx.beginPath(); ctx.arc(px, py, 10 + pulse * 18, 0, Math.PI * 2);
+      const roadY = [800, 1020, 1230][i % 3];
+      const px = 160 + (((i * 173 + ms * 0.08 * ((i % 2) ? 1 : 0.6))) % 760);
+      const pulse = (Math.sin(ms * 0.008 + i) + 1) * 0.5;
+      ctx.beginPath(); ctx.arc(px, roadY, 10 + pulse * 18, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(56,189,248,${0.18 + pulse * 0.25})`; ctx.fill();
-      drawPhoneIcon(px, py, "#38bdf8", 0.55);
+      drawPhoneIcon(px, roadY, "#38bdf8", 0.58);
     }
+    // Crisp frosted dark pill behind label so grid lines never bleed through
+    roundRect(210, 1300, 660, 76, 999, "rgba(5,10,20,0.95)", "#38bdf8", 2.5);
     ctx.fillStyle = "#38bdf8"; ctx.font = "800 28px monospace"; ctx.textAlign = "center";
-    ctx.fillText("LIVE CROWDSOURCED SMARTPHONES ✓", 540, 1365);
+    ctx.fillText("LIVE CROWDSOURCED SMARTPHONES ✓", 540, 1348);
 
   } else if (bid === "t03") {
-    // Privacy Shield: Phone Identity Stripped -> Anonymous Hash
-    roundRect(110, 380, 860, 260, 24, "rgba(127,29,29,0.28)", "#ef4444", 3);
-    ctx.fillStyle = "#fca5a5"; ctx.font = "700 26px sans-serif"; ctx.textAlign = "left";
-    ctx.fillText("RAW DEVICE INFO", 160, 445);
-    ctx.fillStyle = "#f8fafc"; ctx.font = "800 32px monospace";
-    ctx.fillText("Name: Rahul Sharma   ✗ STRIPPED", 160, 515);
-    ctx.fillText("Phone: +91-98xxx-xx  ✗ STRIPPED", 160, 575);
+    // Dynamic multi-packet flow through ANONYMIZER HASH GATE stripping identity live!
+    roundRect(110, 360, 860, 260, 24, "rgba(127,29,29,0.28)", "#ef4444", 3);
+    ctx.fillStyle = "#fca5a5"; ctx.font = "700 24px monospace"; ctx.textAlign = "left";
+    ctx.fillText("RAW DEVICE TELEMETRY", 155, 420);
+    const fadeId = 0.45 + 0.45 * Math.sin(ms * 0.006);
+    ctx.fillStyle = `rgba(248,250,252,${fadeId})`; ctx.font = "800 30px monospace";
+    ctx.fillText("Name: Rahul Sharma   →  [REDACTED]", 155, 490);
+    ctx.fillText("Phone: +91-98xxx-xx  →  [STRIPPED]", 155, 555);
 
-    // Shield Filter Gate
-    const pulseY = 670 + 180;
-    roundRect(170, 750, 740, 150, 24, "rgba(6,78,59,0.55)", "#10b981", 4);
-    ctx.fillStyle = "#34d399"; ctx.font = "800 34px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("🔒 ANONYMIZER HASH GATE", 540, 818);
-    ctx.fillStyle = "#a7f3d0"; ctx.font = "600 24px monospace";
-    ctx.fillText("Zero Personal Identity Stored", 540, 865);
+    // Animated stream of red-identified beads entering gate
+    ctx.strokeStyle = "#334155"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(540, 620); ctx.lineTo(540, 1110); ctx.stroke();
+    for (let k = 0; k < 4; k++) {
+      const f = ((ms / 1800) + k * 0.25) % 1;
+      const py = 630 + f * 470;
+      const insideOrPast = py > 810;
+      ctx.beginPath(); ctx.arc(540, py, 16, 0, Math.PI * 2);
+      ctx.fillStyle = insideOrPast ? "#fbbf24" : "#ef4444";
+      ctx.fill();
+      ctx.fillStyle = insideOrPast ? "#fbbf24" : "#fca5a5";
+      ctx.font = "700 20px monospace"; ctx.textAlign = "left";
+      ctx.fillText(insideOrPast ? "Hash #9F3A ✓" : "Rahul +91...", 575, py + 7);
+    }
 
-    // Output token flowing down
-    const dropY = 930 + ((ms % 1200) / 1200) * 140;
-    ctx.strokeStyle = "#34d399"; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(540, 900); ctx.lineTo(540, 1080); ctx.stroke();
-    ctx.beginPath(); ctx.arc(540, dropY, 16, 0, Math.PI * 2); ctx.fillStyle = "#fbbf24"; ctx.fill();
+    // Active Anonymizer Hash Gate
+    const gatePulse = 0.5 + 0.35 * Math.sin(ms * 0.009);
+    roundRect(160, 745, 760, 138, 24, `rgba(6,62,47,${0.94 + gatePulse * 0.05})`, "#10b981", 4);
+    ctx.fillStyle = "#34d399"; ctx.font = "800 32px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("🔒 REAL-TIME ANONYMIZER GATE", 540, 808);
+    ctx.fillStyle = "#a7f3d0"; ctx.font = "600 22px monospace";
+    ctx.fillText("Strips PII in transit · Emits Random Hash", 540, 852);
 
-    roundRect(150, 1080, 780, 250, 24, "rgba(15,23,42,0.92)", "#38bdf8", 3);
+    roundRect(150, 1110, 780, 235, 24, "rgba(15,23,42,0.94)", "#38bdf8", 3);
     ctx.fillStyle = "#38bdf8"; ctx.font = "800 30px monospace";
-    ctx.fillText("SERVER ONLY SEES: ID #9F3A", 540, 1175);
-    ctx.fillStyle = "#cbd5e1"; ctx.font = "700 28px monospace";
-    ctx.fillText("[ 28.613°N, 77.209°E · 42 km/h ]", 540, 1250);
+    ctx.fillText("SERVER ONLY RECEIVES: ID #9F3A", 540, 1200);
+    ctx.fillStyle = "#cbd5e1"; ctx.font = "700 27px monospace";
+    ctx.fillText("[ 28.613°N, 77.209°E · 42 km/h ]", 540, 1272);
 
   } else if (bid === "t04") {
-    // Radar Ping Anatomy every 5s: 3 crisp numbers
-    const cx = 540, cy = 690;
+    const cx = 540, cy = 670;
     for (let k = 0; k < 3; k++) {
       const rp = ((ms / 1800) + k * 0.33) % 1;
       ctx.beginPath(); ctx.arc(cx, cy, 40 + rp * 290, 0, Math.PI * 2);
@@ -242,71 +289,104 @@ function renderBeatVisual(bid, p, ms) {
       ["3. SPEED VECTOR", "11.4 km/h (EVERY 5.0s)", "#fbbf24"],
     ];
     cards.forEach((c, idx) => {
-      const y = 1010 + idx * 130;
+      const y = 995 + idx * 130;
       const slide = Math.min(1, p * 3.5 - idx * 0.25);
       ctx.save(); ctx.globalAlpha = Math.max(0, slide);
-      roundRect(110, y, 860, 105, 18, "rgba(11,18,34,0.92)", c[2], 2.5);
+      roundRect(110, y, 860, 105, 18, "rgba(11,18,34,0.94)", c[2], 2.5);
       ctx.fillStyle = c[2]; ctx.font = "800 22px monospace"; ctx.textAlign = "left"; ctx.fillText(c[0], 145, y + 40);
       ctx.fillStyle = "#f8fafc"; ctx.font = "800 32px monospace"; ctx.fillText(c[1], 145, y + 82);
       ctx.restore();
     });
 
   } else if (bid === "t05") {
-    // 25 cars squeezing from 50 km/h green to 12 km/h red bottleneck + speedometer
-    roundRect(110, 350, 860, 610, 26, "#091322", "#334155", 3);
-    roundRect(140, 560, 800, 180, 18, "#0f172a", "#1e293b", 2);
-    // Gradient congestion heat on road
-    const gRoad = ctx.createLinearGradient(140, 0, 940, 0);
+    // EXACT 25 PHONES synced with animated speed drop 50 -> 12 km/h & top-right pill!
+    const spd = Math.round(50 - Math.min(1, p * 1.25) * 38);
+    const isJam = spd <= 18;
+    const isWarn = spd <= 34;
+    const colSpd = isJam ? "#ef4444" : (isWarn ? "#fbbf24" : "#10b981");
+
+    // Sync top-right pill & status dot dynamically (never spoil 12 km/h early!)
+    document.getElementById("topMetric").textContent = `LIVE: ${spd} KM/H`;
+    document.getElementById("topDot").className = "dot " + (isJam ? "red" : (isWarn ? "amber" : ""));
+
+    roundRect(95, 340, 890, 620, 26, "#091322", "#334155", 3);
+    roundRect(130, 520, 820, 270, 18, "#0f172a", "#1e293b", 2);
+    const gRoad = ctx.createLinearGradient(130, 0, 950, 0);
     gRoad.addColorStop(0, "rgba(16,185,129,0.22)");
     gRoad.addColorStop(0.45, "rgba(245,158,11,0.35)");
     gRoad.addColorStop(1, "rgba(239,68,68,0.55)");
-    ctx.fillStyle = gRoad; ctx.fillRect(142, 562, 796, 176);
+    ctx.fillStyle = gRoad; ctx.fillRect(132, 522, 816, 266);
 
-    for (let i = 0; i < 20; i++) {
-      const col = i > 7 ? "#ef4444" : (i > 4 ? "#f59e0b" : "#10b981");
-      const x = i < 7 ? (165 + i * 44) : (485 + (i - 7) * 30);
-      const y = 595 + (i % 2) * 72;
+    // 25 exact phone/car transmitters across 3 lanes, crowding toward bottleneck!
+    for (let i = 0; i < 25; i++) {
+      const col = i > 8 ? (isJam ? "#ef4444" : "#f59e0b") : (i > 4 ? "#f59e0b" : "#10b981");
+      let x = i < 7 ? (158 + i * 44) : (482 + Math.floor((i - 7) / 3) * 68);
+      if (i >= 7) x += ((i - 7) % 3) * 20;
+      const lane = i % 3;
+      const y = 550 + lane * 76;
       roundRect(x, y, 22, 34, 6, col, "#fff", 1.5);
     }
-    ctx.fillStyle = "#34d399"; ctx.font = "800 26px monospace"; ctx.textAlign = "left"; ctx.fillText("50 km/h", 160, 520);
-    ctx.fillStyle = "#ef4444"; ctx.textAlign = "right"; ctx.fillText("12 km/h JAM!", 920, 520);
+    ctx.fillStyle = "#34d399"; ctx.font = "800 26px monospace"; ctx.textAlign = "left";
+    ctx.fillText("25 ACTIVE PHONES: 50 km/h", 140, 480);
+    ctx.fillStyle = colSpd; ctx.textAlign = "right";
+    ctx.fillText(`${spd} km/h ${isJam ? "JAM!" : "DROPPING"}`, 940, 480);
 
-    // Live Speedometer Arc below
-    const spd = Math.round(50 - Math.min(1, p * 1.3) * 38);
-    const colSpd = spd < 20 ? "#ef4444" : "#fbbf24";
-    roundRect(190, 1000, 700, 355, 26, "rgba(11,18,34,0.92)", colSpd, 3);
+    // Live Speedometer Arc cleanly synced with threshold alert
+    roundRect(180, 995, 720, 360, 26, "rgba(11,18,34,0.94)", colSpd, 3);
     ctx.beginPath(); ctx.arc(540, 1245, 168, Math.PI, Math.PI * 2);
     ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 20; ctx.stroke();
     ctx.beginPath(); ctx.arc(540, 1245, 168, Math.PI, Math.PI + (spd / 60) * Math.PI);
     ctx.strokeStyle = colSpd; ctx.lineWidth = 20; ctx.stroke();
-    ctx.fillStyle = "#f8fafc"; ctx.font = "900 54px monospace"; ctx.textAlign = "center"; ctx.fillText(`${spd} km/h`, 540, 1225);
-    ctx.fillStyle = "#94a3b8"; ctx.font = "700 23px sans-serif"; ctx.fillText("CROWD THRESHOLD HIT → LINE TURNS RED", 540, 1305);
+    ctx.fillStyle = "#f8fafc"; ctx.font = "900 56px monospace"; ctx.textAlign = "center";
+    ctx.fillText(`${spd} km/h`, 540, 1225);
+    ctx.fillStyle = isJam ? "#fca5a5" : "#94a3b8"; ctx.font = "800 24px monospace";
+    const statusTxt = isJam ? "CROWD THRESHOLD HIT → LINE TURNS RED!" : (isWarn ? "CONGESTION BUILDING..." : "NORMAL TRAFFIC FLOW");
+    ctx.fillText(statusTxt, 540, 1305);
 
   } else if (bid === "t06") {
-    // Historical Tuesday 6:15 PM Baseline vs Live Curve
-    roundRect(80, 380, 920, 880, 28, "rgba(8,14,26,0.95)", "#38bdf8", 2.5);
-    ctx.fillStyle = "#38bdf8"; ctx.font = "800 28px monospace"; ctx.textAlign = "left";
-    ctx.fillText("SPEED TIMELINE (TUESDAYS @ 6:15 PM)", 130, 445);
+    // Telemetry Chart WITH explicit X-axis (5:30–7:00 PM) & Y-axis (0–60 km/h) ticks
+    roundRect(70, 365, 940, 910, 28, "rgba(8,14,26,0.95)", "#38bdf8", 2.5);
+    ctx.fillStyle = "#38bdf8"; ctx.font = "800 27px monospace"; ctx.textAlign = "left";
+    ctx.fillText("REAL-TIME SPEED VS. TUESDAY BASELINE", 120, 430);
 
-    const gx0 = 150, gy0 = 1080, gw = 780, gh = 480;
-    ctx.strokeStyle = "#334155"; ctx.lineWidth = 3;
+    const gx0 = 185, gy0 = 1070, gw = 760, gh = 510;
+    // Y-axis ticks & grid lines (0, 20, 40, 60 km/h)
+    ctx.font = "700 22px monospace"; ctx.textAlign = "right";
+    [0, 20, 40, 60].forEach((spdVal) => {
+      const yy = gy0 - (spdVal / 60) * gh;
+      ctx.strokeStyle = "rgba(148,163,184,0.16)"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(gx0, yy); ctx.lineTo(gx0 + gw, yy); ctx.stroke();
+      ctx.fillStyle = "#94a3b8"; ctx.fillText(`${spdVal}`, gx0 - 16, yy + 7);
+    });
+    ctx.save(); ctx.translate(105, gy0 - gh / 2); ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "#64748b"; ctx.font = "700 20px monospace"; ctx.textAlign = "center";
+    ctx.fillText("SPEED (KM/H)", 0, 0); ctx.restore();
+
+    // X-axis ticks (5:30 PM -> 7:00 PM)
+    ctx.textAlign = "center"; ctx.font = "700 21px monospace";
+    ["5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM"].forEach((lbl, idx) => {
+      const xx = gx0 + (idx / 3) * gw;
+      ctx.fillStyle = "#94a3b8"; ctx.fillText(lbl, xx, gy0 + 38);
+    });
+
+    ctx.strokeStyle = "#475569"; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(gx0, gy0 - gh); ctx.lineTo(gx0, gy0); ctx.lineTo(gx0 + gw, gy0); ctx.stroke();
 
-    // Dashed Historical Blue Baseline
+    // Dashed 52-Week Baseline
     ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 6; ctx.setLineDash([14, 10]);
     ctx.beginPath();
-    const histPts = [0.75, 0.72, 0.65, 0.48, 0.32, 0.25, 0.28, 0.42];
+    const histPts = [0.80, 0.75, 0.66, 0.50, 0.34, 0.28, 0.32, 0.48];
     histPts.forEach((v, i) => {
       const px = gx0 + (i / 7) * gw, py = gy0 - v * gh;
       i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
     });
     ctx.stroke(); ctx.setLineDash([]);
 
-    // Animated Live Red Anomaly Curve
+    // Animated Live Anomaly Trace
     const maxSeg = Math.max(1, p * 7);
     ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 9;
     ctx.beginPath();
-    const livePts = [0.76, 0.70, 0.56, 0.30, 0.16, 0.14, 0.16, 0.22];
+    const livePts = [0.80, 0.72, 0.58, 0.30, 0.16, 0.14, 0.15, 0.20];
     livePts.forEach((v, i) => {
       if (i <= Math.ceil(maxSeg)) {
         const px = gx0 + (i / 7) * gw, py = gy0 - v * gh;
@@ -314,99 +394,113 @@ function renderBeatVisual(bid, p, ms) {
       }
     });
     ctx.stroke();
-    roundRect(140, 1130, 380, 82, 14, "rgba(56,189,248,0.16)", "#38bdf8", 2);
-    ctx.fillStyle = "#7dd3fc"; ctx.font = "700 23px monospace"; ctx.fillText("--- 52 Tuesdays Baseline", 165, 1180);
-    roundRect(560, 1130, 380, 82, 14, "rgba(239,68,68,0.18)", "#ef4444", 2);
-    ctx.fillStyle = "#fca5a5"; ctx.fillText("━━ Today's Early Drop", 585, 1180);
+    roundRect(120, 1140, 405, 82, 14, "rgba(56,189,248,0.16)", "#38bdf8", 2);
+    ctx.fillStyle = "#7dd3fc"; ctx.font = "700 22px monospace"; ctx.textAlign = "center"; ctx.fillText("--- 52 Tuesdays Baseline", 322, 1188);
+    roundRect(555, 1140, 405, 82, 14, "rgba(239,68,68,0.18)", "#ef4444", 2);
+    ctx.fillStyle = "#fca5a5"; ctx.fillText("━━ Today Live Drop", 757, 1188);
 
   } else if (bid === "t07") {
-    // Supersegments & Graph Neural Network Propagation
+    // Topological Road Graph WITH descriptive labels & directional flow arrows!
     const nodes = [
-      { id: "J1", x: 540, y: 450, jam: true },
-      { id: "J2", x: 300, y: 690, jam: p > 0.25 },
-      { id: "J3", x: 780, y: 690, jam: p > 0.35 },
-      { id: "J4", x: 540, y: 920, jam: p > 0.55 },
-      { id: "J5", x: 260, y: 1170, jam: false },
-      { id: "J6", x: 820, y: 1170, jam: p > 0.75 },
+      { id: "CHOKE POINT", x: 540, y: 445, jam: true, r: 58 },
+      { id: "MAIN RD N", x: 270, y: 690, jam: p > 0.22, r: 48 },
+      { id: "FLYOVER", x: 810, y: 690, jam: p > 0.35, r: 48 },
+      { id: "FEEDER JN", x: 540, y: 940, jam: p > 0.52, r: 50 },
+      { id: "ENTRY WEST", x: 240, y: 1185, jam: false, r: 46 },
+      { id: "BYPASS E", x: 840, y: 1185, jam: p > 0.72, r: 46 },
     ];
-    const edges = [[0,1],[0,2],[1,3],[2,3],[1,4],[3,4],[3,5],[2,5]];
+    // Traffic flows UPSTREAM -> DOWNSTREAM toward Choke Point; draw flow arrows!
+    const edges = [[4,1],[1,0],[4,3],[3,1],[3,2],[5,3],[5,2],[2,0]];
     edges.forEach(([a, b]) => {
       const hot = nodes[a].jam && nodes[b].jam;
+      const mx = (nodes[a].x + nodes[b].x) * 0.5, my = (nodes[a].y + nodes[b].y) * 0.5;
+      drawArrow(nodes[a].x, nodes[a].y, mx, my, hot ? "#ef4444" : "rgba(56,189,248,0.55)", hot ? 8 : 4, 15);
       ctx.strokeStyle = hot ? "#ef4444" : "rgba(56,189,248,0.4)";
-      ctx.lineWidth = hot ? 10 : 5;
-      ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
+      ctx.lineWidth = hot ? 8 : 4;
+      ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
     });
     nodes.forEach((n, i) => {
       if (n.jam) {
         const rp = (ms / 900 + i * 0.2) % 1;
-        ctx.beginPath(); ctx.arc(n.x, n.y, 44 + rp * 55, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r + rp * 55, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(239,68,68,${1 - rp})`; ctx.lineWidth = 4; ctx.stroke();
       }
-      ctx.beginPath(); ctx.arc(n.x, n.y, 46, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
       ctx.fillStyle = n.jam ? "#7f1d1d" : "#0f172a"; ctx.fill();
       ctx.strokeStyle = n.jam ? "#ef4444" : "#38bdf8"; ctx.lineWidth = 5; ctx.stroke();
-      ctx.fillStyle = "#fff"; ctx.font = "800 30px monospace"; ctx.textAlign = "center";
-      ctx.fillText(n.id, n.x, n.y + 10);
+      ctx.fillStyle = "#fff"; ctx.font = "800 18px monospace"; ctx.textAlign = "center";
+      ctx.fillText(n.id, n.x, n.y + 6);
     });
-    roundRect(140, 1275, 800, 90, 18, "rgba(15,23,42,0.92)", "#fbbf24", 2.5);
-    ctx.fillStyle = "#fde68a"; ctx.font = "800 26px monospace";
-    ctx.fillText("GNN PROPAGATION: +10 MIN FUTURE IMPACT", 540, 1330);
+    roundRect(120, 1285, 840, 86, 18, "rgba(15,23,42,0.94)", "#fbbf24", 2.5);
+    ctx.fillStyle = "#fde68a"; ctx.font = "800 24px monospace";
+    ctx.fillText("RED WAVE BACK-PROPAGATES BEFORE CARS ARRIVE", 540, 1336);
 
   } else if (bid === "t08") {
-    // 2020 Berlin Artist pulling RED HANDCART with 99 green glowing phones on empty street
-    roundRect(160, 360, 760, 990, 28, "#08101c", "#334155", 3);
-    // Completely empty gray asphalt bridge road
-    ctx.fillStyle = "#111827"; ctx.fillRect(340, 380, 400, 950);
-    ctx.strokeStyle = "rgba(255,255,255,0.22)"; ctx.setLineDash([26, 26]); ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.moveTo(540, 390); ctx.lineTo(540, 1320); ctx.stroke(); ctx.setLineDash([]);
+    // Split Screen Berlin 2020 Climax! Top: Empty Street + Red Handcart walking; Bottom: Live Phone Map shifting Green -> Yellow -> Red
+    roundRect(90, 340, 900, 500, 24, "#08101c", "#334155", 3);
+    ctx.fillStyle = "#111827"; ctx.fillRect(360, 355, 360, 470);
+    ctx.strokeStyle = "rgba(255,255,255,0.22)"; ctx.setLineDash([22, 22]); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(540, 360); ctx.lineTo(540, 820); ctx.stroke(); ctx.setLineDash([]);
 
-    const cartY = 1120 - p * 420;
-    // Red handcart!
-    roundRect(455, cartY, 170, 210, 16, "#991b1b", "#ef4444", 5);
-    // Tiny walking figure ahead of cart handle
+    const cartY = 720 - p * 230;
+    roundRect(475, cartY, 130, 155, 14, "#991b1b", "#ef4444", 4);
     ctx.strokeStyle = "#f8fafc"; ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.moveTo(540, cartY); ctx.lineTo(540, cartY - 38); ctx.stroke();
-    ctx.beginPath(); ctx.arc(540, cartY - 56, 18, 0, Math.PI * 2); ctx.fillStyle = "#f8fafc"; ctx.fill();
-    // 99 blinking green Android phone grid packed inside cart!
-    for (let r = 0; r < 6; r++) {
+    ctx.beginPath(); ctx.moveTo(540, cartY); ctx.lineTo(540, cartY - 30); ctx.stroke();
+    ctx.beginPath(); ctx.arc(540, cartY - 46, 15, 0, Math.PI * 2); ctx.fillStyle = "#f8fafc"; ctx.fill();
+    for (let r = 0; r < 5; r++) {
       for (let c = 0; c < 4; c++) {
-        const blink = ((r + c + Math.floor(ms / 220)) % 3 === 0) ? "#34d399" : "#10b981";
-        ctx.fillStyle = blink;
-        ctx.fillRect(475 + c * 34, cartY + 20 + r * 28, 22, 18);
+        ctx.fillStyle = ((r + c + Math.floor(ms / 200)) % 3 === 0) ? "#34d399" : "#10b981";
+        ctx.fillRect(490 + c * 26, cartY + 14 + r * 24, 18, 15);
       }
     }
-    roundRect(220, 410, 640, 100, 16, "rgba(15,23,42,0.92)", "#fbbf24", 2.5);
-    ctx.fillStyle = "#fbbf24"; ctx.font = "800 28px monospace"; ctx.textAlign = "center";
-    ctx.fillText("BERLIN 2020 · 99 PHONES @ 3 KM/H", 540, 470);
+    roundRect(120, 370, 290, 76, 14, "rgba(15,23,42,0.92)", "#fbbf24", 2);
+    ctx.fillStyle = "#fbbf24"; ctx.font = "800 22px monospace"; ctx.textAlign = "center";
+    ctx.fillText("BERLIN STREET (0 CARS)", 265, 416);
+
+    // Bottom: Live Phone Map Screen shifting Green -> Yellow -> Crimson dynamically!
+    roundRect(130, 875, 820, 490, 28, "#0f172a", "#38bdf8", 3);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "800 22px monospace";
+    ctx.fillText("LIVE GOOGLE MAPS ROUTE VIEW", 540, 922);
+    const mapCol = p < 0.35 ? "#10b981" : (p < 0.72 ? "#f59e0b" : "#ef4444");
+    const mapTxt = p < 0.35 ? "CLEAR ROAD" : (p < 0.72 ? "SLOWING DOWN..." : "CONGESTION TURNED RED!");
+    roundRect(190, 955, 700, 250, 18, "#060b16", mapCol, 3);
+    ctx.strokeStyle = mapCol; ctx.lineWidth = 24;
+    ctx.beginPath(); ctx.moveTo(250, 1080); ctx.lineTo(830, 1080); ctx.stroke();
+    roundRect(240, 1235, 600, 95, 16, "rgba(15,23,42,0.94)", mapCol, 2.5);
+    ctx.fillStyle = mapCol; ctx.font = "800 28px monospace"; ctx.fillText(mapTxt, 540, 1292);
 
   } else if (bid === "t09") {
-    // Empty street overlaid with solid crimson Google Maps Jam Card!
-    ctx.fillStyle = "#111827"; ctx.fillRect(340, 360, 400, 1000);
-    // Turn entire empty road blazing crimson red!
-    const pulse = 0.65 + 0.25 * Math.sin(ms * 0.01);
-    roundRect(355, 370, 370, 980, 16, `rgba(239,68,68,${pulse * 0.55})`, "#ef4444", 6);
+    // Wide Empty Asphalt Street + Animated Camera Sweep + Flashing Ghost Jam Alert
+    const zoom = 1.0 + Math.sin(p * Math.PI) * 0.05;
+    ctx.save(); ctx.translate(540, 860); ctx.scale(zoom, zoom); ctx.translate(-540, -860);
+    ctx.fillStyle = "#111827"; ctx.fillRect(190, 340, 700, 1040);
+    // Sidewalk trees / street markings showing real wide empty bridge
+    ctx.fillStyle = "#08101c"; ctx.fillRect(190, 340, 80, 1040); ctx.fillRect(810, 340, 80, 1040);
+    const pulse = 0.55 + 0.35 * Math.sin(ms * 0.012);
+    roundRect(295, 360, 490, 1000, 16, `rgba(239,68,68,${pulse * 0.55})`, "#ef4444", 6);
     ctx.fillStyle = "#fca5a5"; ctx.font = "800 32px monospace"; ctx.textAlign = "center";
-    ctx.fillText("ZERO REAL CARS", 540, 610);
-    roundRect(140, 740, 800, 260, 26, "rgba(127,29,29,0.94)", "#ef4444", 4);
-    ctx.fillStyle = "#ffffff"; ctx.font = "900 46px sans-serif"; ctx.fillText("SEVERE TRAFFIC JAM", 540, 835);
-    ctx.fillStyle = "#fde68a"; ctx.font = "800 34px monospace"; ctx.fillText("+38 MIN DELAY · 99 PHONES FOOLED IT", 540, 915);
+    ctx.fillText("0 REAL CARS ON ASPHALT", 540, 560);
+    // Sweeping warning scanline
+    const sy = 380 + ((ms * 0.45) % 940);
+    ctx.fillStyle = "rgba(254,202,202,0.35)"; ctx.fillRect(300, sy, 480, 10);
+    roundRect(130, 740, 820, 265, 26, "rgba(127,29,29,0.96)", "#ef4444", 4.5);
+    ctx.fillStyle = "#ffffff"; ctx.font = "900 46px sans-serif"; ctx.fillText("SEVERE GHOST JAM!", 540, 840);
+    ctx.fillStyle = "#fde68a"; ctx.font = "800 32px monospace"; ctx.fillText("+38 MIN DELAY · HACKED BY 99 PHONES", 540, 920);
+    ctx.restore();
 
   } else if (bid === "t10") {
-    // Top: Outlier Radar rejecting parked delivery scooters; Bottom: 3-way Load Balancing Split
-    roundRect(110, 350, 860, 380, 24, "rgba(11,18,34,0.92)", "#38bdf8", 2.5);
+    roundRect(110, 350, 860, 380, 24, "rgba(11,18,34,0.94)", "#38bdf8", 2.5);
     ctx.fillStyle = "#38bdf8"; ctx.font = "800 26px monospace"; ctx.textAlign = "left";
     ctx.fillText("FILTER 1: IGNORE PARKED OUTLIERS", 150, 410);
     for (let i = 0; i < 6; i++) {
       ctx.beginPath(); ctx.arc(210 + i * 70, 525, 16, 0, Math.PI * 2); ctx.fillStyle = "#64748b"; ctx.fill();
     }
-    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 5;
-    ctx.strokeRect(175, 480, 420, 90);
+    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 5; ctx.strokeRect(175, 480, 420, 90);
     ctx.fillStyle = "#fca5a5"; ctx.font = "800 24px monospace"; ctx.fillText("0 km/h Parked Cluster ✗", 625, 535);
-    ctx.fillStyle = "#34d399"; ctx.fillText("Moving Windshields ✓", 150, 665);
+    ctx.fillStyle = "#34d399"; ctx.fillText("Moving Windshields Only ✓", 150, 665);
 
-    roundRect(110, 780, 860, 580, 24, "rgba(11,18,34,0.92)", "#10b981", 2.5);
+    roundRect(110, 780, 860, 580, 24, "rgba(11,18,34,0.94)", "#10b981", 2.5);
     ctx.fillStyle = "#34d399"; ctx.font = "800 26px monospace"; ctx.fillText("FILTER 2: DYNAMIC ROUTE LOAD BALANCING", 150, 845);
-    // 1 trunk splitting cleanly into 3 balanced routes well below header
     ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 10;
     const forks = [[960, "ROUTE A · 40%"], [1110, "ROUTE B · 35%"], [1260, "ROUTE C · 25%"]];
     forks.forEach(([fy, lbl], idx) => {
@@ -418,9 +512,8 @@ function renderBeatVisual(bid, p, ms) {
     });
 
   } else if (bid === "t11") {
-    // Smart Bypass ETA Lock cleanly separated below banner
     roundRect(120, 380, 840, 880, 28, "#081221", "#10b981", 3);
-    roundRect(220, 420, 640, 105, 20, "rgba(6,78,59,0.92)", "#10b981", 3);
+    roundRect(220, 420, 640, 105, 20, "rgba(6,78,59,0.94)", "#10b981", 3);
     ctx.fillStyle = "#6ee7b7"; ctx.font = "900 38px monospace"; ctx.textAlign = "center";
     ctx.fillText("ETA LOCKED: 18 MIN ✓", 540, 486);
 
@@ -434,24 +527,34 @@ function renderBeatVisual(bid, p, ms) {
     ctx.beginPath(); ctx.arc(ax, ay, 22, 0, Math.PI * 2); ctx.fillStyle = "#fde68a"; ctx.fill();
 
   } else if (bid === "t12") {
-    // 3 Unified Signal Pillars Finale
+    // Dynamic Staggered Stacking + Highlight Sweep + Pulsing Follow & Question CTA
     const pillars = [
       ["01 · LIVE ANONYMOUS PINGS", "Location · Heading · Speed every 5s", "#38bdf8"],
-      ["02 · HISTORICAL BASELINE", "52-Week Tuesday/Rush-Hour Comparison", "#fbbf24"],
+      ["02 · HISTORICAL BASELINE", "52-Week Tuesday / Rush-Hour Overlay", "#fbbf24"],
       ["03 · GRAPH NEURAL AI", "Upstream Jam Prediction & Load Split", "#10b981"],
     ];
     pillars.forEach((pl, i) => {
-      const y = 410 + i * 245;
-      const sc = Math.min(1, Math.max(0.85, p * 2.5 - i * 0.2));
-      ctx.save(); ctx.translate(540, y + 95); ctx.scale(sc, sc); ctx.translate(-540, -(y + 95));
-      roundRect(110, y, 860, 195, 24, "rgba(11,18,34,0.94)", pl[2], 3.5);
-      ctx.fillStyle = pl[2]; ctx.font = "800 30px monospace"; ctx.textAlign = "left"; ctx.fillText(pl[0], 155, y + 72);
-      ctx.fillStyle = "#f1f5f9"; ctx.font = "700 28px sans-serif"; ctx.fillText(pl[1], 155, y + 132);
+      const y = 370 + i * 225;
+      const enter = Math.min(1, Math.max(0, (p * 2.6 - i * 0.45)));
+      const slideX = (1 - enter) * -140;
+      const activeGlow = Math.floor(p * 3.2) === i;
+      ctx.save(); ctx.globalAlpha = enter; ctx.translate(slideX, 0);
+      roundRect(110, y, 860, 185, 24, activeGlow ? "rgba(18,32,58,0.96)" : "rgba(11,18,34,0.94)", pl[2], activeGlow ? 5 : 3);
+      ctx.fillStyle = pl[2]; ctx.font = "800 30px monospace"; ctx.textAlign = "left"; ctx.fillText(pl[0], 155, y + 70);
+      ctx.fillStyle = "#f1f5f9"; ctx.font = "700 28px sans-serif"; ctx.fillText(pl[1], 155, y + 128);
       ctx.restore();
     });
-    roundRect(240, 1190, 600, 110, 999, "rgba(16,185,129,0.16)", "#10b981", 2.5);
-    ctx.fillStyle = "#34d399"; ctx.font = "800 32px monospace"; ctx.textAlign = "center";
-    ctx.fillText("FOLLOW ETERNAL STUDENT ✓", 540, 1256);
+
+    const ctaScale = 1.0 + 0.03 * Math.sin(ms * 0.008);
+    ctx.save(); ctx.translate(540, 1135); ctx.scale(ctaScale, ctaScale); ctx.translate(-540, -1135);
+    roundRect(220, 1085, 640, 96, 999, "rgba(6,78,59,0.75)", "#10b981", 3.5);
+    ctx.fillStyle = "#6ee7b7"; ctx.font = "800 32px monospace"; ctx.textAlign = "center";
+    ctx.fillText("FOLLOW ETERNAL STUDENT ✓", 540, 1144);
+    ctx.restore();
+
+    roundRect(130, 1215, 820, 108, 20, "rgba(15,23,42,0.92)", "#fbbf24", 2.5);
+    ctx.fillStyle = "#fde68a"; ctx.font = "700 27px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("क्या आप कभी ऐसे Ghost Jam में फँसे हैं? Comment करें!", 540, 1278);
   }
 
   ctx.restore();
