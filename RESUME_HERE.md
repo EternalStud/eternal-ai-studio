@@ -119,10 +119,19 @@
   - **New Studio Rule Across All `.md` Files:** **Analyse the topic FIRST** to decide which skills/visuals are needed (never force Blender 3D onto topics better served by bespoke Canvas/SVG motion graphics or zoomed screen recordings), and enforce **1 beat = 1 bespoke animated visual**.
 
 ## Next Steps
-1. **Google Maps 2-Minute Explainer (`v1` Shipped & Posted -> `70–100` Early Views; `v2` Upgraded from `7.4/10` Critique):**
-   - **Published Baseline (`v1`):** `output/gmaps_traffic_2min_1080x1920.mp4` (`24.0 MB`, `1080×1920 @ 30fps`, `135.25s`, `-14 LUFS`).
-   - **Critique Findings Permanently Encoded into `docs/QUALITY_STANDARDS.md` & `scenes/gmaps_2min_1080x1920.html` (`v2`):**
-     - Replaced static slide-deck scenes (`t03`, `t08`, `t09`, `t12`) with continuous packet anonymization flow, split-screen Berlin cart + live shifting `Green → Amber → Crimson` phone map UI, and staggered 3-pillar card reveal + interactive comment prompt.
-     - Fixed count/telemetry sync (`25` exact phone icons in `t05`, dynamic top-right speed pill + threshold alert tracking gauge needle `50 → 12 km/h`), added explicit `5:30 PM – 7:00 PM` & `0 – 60 km/h` axes ticks (`t06`), replaced abstract `J1–J6` with directional arrows + `Choke Point` node labels (`t07`), added frosted pill backing (`t02`), and added full-bleed highway POV (`t01`) to break layout monotony.
-2. **YouTube Channel Bridge (`automation/youtube_bridge.py`):**
-   - Supports both immediate public channel audit (`yt-dlp`, once channel URL/handle is provided) and sanctioned Google OAuth 2.0 (`YouTube Data API v3` + `YouTube Analytics API`) using `.gitignored` `credentials/youtube_client_secret.json` for retention analytics + gated upload automation.
+1. **Google Maps 2-Minute Explainer `v2` (COMPLETE — Visually Verified & Staged on `Decode Systems`):**
+   - **Final Output:** `output/gmaps_traffic_2min_1080x1920.mp4` (`26.7 MB`, `1080×1920 @ 30fps`, `135.25s` / `4,058` frames, `-14 LUFS`, dual-voice `Chatterbox Notebook LLM hindi` + `Veena kavya`).
+   - **Critique Fixes Verified via Extracted MP4 Frames (`f_3s.png`, `f_24s.png`, `f_46s.png`, `f_82s.png`):**
+     - Replaced static slide-deck beats (`t03`, `t08`, `t09`, `t12`) with continuous opaque-gate packet anonymization flow (`Rahul +91...` → `Hash #9F3A ✓`), split-screen Berlin cart + live `Green → Amber → Crimson` phone map UI, and staggered 3-pillar card reveal + Ghost Jam comment prompt.
+     - Fixed exact count/telemetry sync (`25` phone icons in `t05`, live top-right `LIVE: XX KM/H` pill + `CONGESTION BUILDING...` threshold synced to gauge needle `50 → 12 km/h`), explicit `5:30–7:00 PM` & `0–60 km/h` axes (`t06`), descriptive graph nodes + directional flow arrows (`t07`), frosted pill backing (`t02`), and full-bleed highway POV (`t01`).
+2. **Multi-Channel YouTube Bridge & Autonomous `Decode Systems` Launch (`automation/youtube_bridge.py`):**
+   - **Channel Separation Enforced:**
+     - `Eternal Student` (`@Etrnll0v` / `UCU7tyDOES8n9XqIDJ86gSrQ`): User's co-managed teacher/school portal automation channel.
+     - `Decode Systems` (`decode_systems` alias -> `UCqhU754GdfiB-1IVQFmem6g`, aged `2012-01-02`, formerly `Eternal Love`): Autonomous tech/AI/systems channel targeting YPP monetization (`1,000` subs + `4,000` watch hours).
+   - **Completed Channel Setup & Staged Launch:**
+     - Pushed `Decode Systems` description, keywords, `country="IN"`, and `defaultLanguage="hi"` via `channels.update`.
+     - Generated `800×800` avatar (`assets/decode_systems_avatar.png`) and `2560×1440` banner (`assets/decode_systems_banner.png`) and documented full pipeline in `docs/CHANNEL_DECODE_SYSTEMS.md`.
+     - Stage-uploaded Episode #1 (`v2`) onto `decode_systems` as a `private` draft: **Video ID `Dd3bUHJ73VU`** (`https://www.youtube.com/watch?v=Dd3bUHJ73VU`).
+3. **Immediate Next Actions:**
+   - Complete the one-time 15-second YouTube Studio UI update on `UCqhU754GdfiB-1IVQFmem6g` (Name → `Decode Systems`, Handle → `@decodesystems_in`, upload `decode_systems_avatar.png` + `decode_systems_banner.png`), then set `Dd3bUHJ73VU` to Public.
+   - Produce **Episode #2** (`16:9` 6-min Deep Dive + paired 2-min Short hook per `docs/CHANNEL_DECODE_SYSTEMS.md`) to start stacking watch hours + subscribers together.

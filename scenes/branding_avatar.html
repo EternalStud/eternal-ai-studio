@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 800px;
+    height: 800px;
+    background: #060913;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .glow {
+    position: absolute;
+    width: 680px;
+    height: 680px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.24) 0%, rgba(245, 158, 11, 0.08) 45%, rgba(6, 9, 19, 0) 72%);
+  }
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .frame {
+    position: relative;
+    width: 620px;
+    height: 620px;
+    border-radius: 140px;
+    background: linear-gradient(145deg, #0c1428 0%, #070b17 100%);
+    border: 3px solid rgba(56, 189, 248, 0.42);
+    box-shadow: 0 0 80px rgba(14, 165, 233, 0.25), inset 0 0 40px rgba(56, 189, 248, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  svg.emblem {
+    width: 340px;
+    height: 280px;
+    margin-bottom: 12px;
+  }
+  .title {
+    font-size: 46px;
+    font-weight: 800;
+    letter-spacing: 5px;
+    color: #f8fafc;
+    text-transform: uppercase;
+  }
+  .title span {
+    color: #38bdf8;
+  }
+  .sub {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: #f59e0b;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="glow"></div>
+  <div class="frame">
+    <svg class="emblem" viewBox="0 0 340 280" fill="none">
+      <!-- Signal nodes & packet traces -->
+      <line x1="65" y1="80" x2="145" y2="140" stroke="#38bdf8" stroke-width="4" stroke-opacity="0.65" />
+      <line x1="65" y1="200" x2="145" y2="140" stroke="#38bdf8" stroke-width="4" stroke-opacity="0.65" />
+      <line x1="145" y1="140" x2="225" y2="85" stroke="#f59e0b" stroke-width="5" />
+      <line x1="145" y1="140" x2="275" y2="140" stroke="#38bdf8" stroke-width="5" />
+      <line x1="145" y1="140" x2="225" y2="195" stroke="#22c55e" stroke-width="5" />
+      <!-- Outer telemetry ring -->
+      <circle cx="170" cy="140" r="118" stroke="rgba(56,189,248,0.22)" stroke-width="2" stroke-dasharray="10 8" />
+      <!-- Source nodes -->
+      <circle cx="65" cy="80" r="16" fill="#0c1428" stroke="#38bdf8" stroke-width="5" />
+      <circle cx="65" cy="200" r="16" fill="#0c1428" stroke="#38bdf8" stroke-width="5" />
+      <!-- Core decoder diamond -->
+      <polygon points="145,102 183,140 145,178 107,140" fill="#0c1428" stroke="#38bdf8" stroke-width="6" />
+      <circle cx="145" cy="140" r="12" fill="#f59e0b" />
+      <!-- Output nodes -->
+      <circle cx="225" cy="85" r="15" fill="#0c1428" stroke="#f59e0b" stroke-width="5" />
+      <circle cx="275" cy="140" r="17" fill="#0c1428" stroke="#38bdf8" stroke-width="5" />
+      <circle cx="225" cy="195" r="15" fill="#0c1428" stroke="#22c55e" stroke-width="5" />
+    </svg>
+    <div class="title">DECODE <span>SYS</span></div>
+    <div class="sub">TECH &bull; AI &bull; SYSTEMS</div>
+  </div>
+</body>
+</html>
